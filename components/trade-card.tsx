@@ -1,7 +1,6 @@
 import { Trade } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns"; // Check if date-fns is installed, if not use native
 
 export function TradeCard({ trade }: { trade: Trade }) {
   const isWin = trade.status === "Win";
