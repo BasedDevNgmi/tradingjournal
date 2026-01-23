@@ -7,6 +7,8 @@ import { MOCK_TRADES } from '@/lib/mock-data';
 interface TradesContextType {
   trades: Trade[];
   addTrade: (trade: Trade) => void;
+  updateTrade: (id: string, updatedData: Partial<Trade>) => void;
+  deleteTrade: (id: string) => void;
 }
 
 const TradesContext = createContext<TradesContextType | undefined>(undefined);
@@ -42,8 +44,18 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
     setTrades((prev) => [trade, ...prev]);
   };
 
+  const updateTrade = (id: string, updatedData: Partial<Trade>) => {
+    setTrades((prev) => 
+      prev.map((trade) => (trade.id === id ? { ...trade, ...updatedData } : trade))
+    );
+  };
+
+  const deleteTrade = (id: string) => {
+    setTrades((prev) => prev.filter((trade) => trade.id !== id));
+  };
+
   return (
-    <TradesContext.Provider value={{ trades, addTrade }}>
+    <TradesContext.Provider value={{ trades, addTrade, updateTrade, deleteTrade }}>
       {children}
     </TradesContext.Provider>
   );

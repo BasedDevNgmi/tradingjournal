@@ -3,13 +3,15 @@
 import { useState, useMemo, useEffect } from "react";
 import { useTrades } from "@/context/trade-context";
 import { TradeCard } from "./trade-card";
-import { FilterBar, FilterType } from "./filter-bar";
+import { TradeTable } from "./trade-table";
+import { FilterBar, FilterType, ViewMode } from "./filter-bar";
 import { Ghost } from "lucide-react";
 
 export function TradeList() {
   const { trades } = useTrades();
   const [filter, setFilter] = useState<FilterType>('All');
   const [sortBy, setSortBy] = useState<string>('newest');
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch
@@ -56,14 +58,20 @@ export function TradeList() {
         onFilterChange={setFilter}
         activeSort={sortBy}
         onSortChange={setSortBy}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
       />
 
       {filteredAndSortedTrades.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAndSortedTrades.map((trade) => (
-            <TradeCard key={trade.id} trade={trade} />
-          ))}
-        </div>
+        viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredAndSortedTrades.map((trade) => (
+              <TradeCard key={trade.id} trade={trade} />
+            ))}
+          </div>
+        ) : (
+          <TradeTable trades={filteredAndSortedTrades} />
+        )
       ) : (
         <div className="flex flex-col items-center justify-center py-20 border-4 border-dashed border-black bg-zinc-50">
           <Ghost size={48} className="mb-4" />
