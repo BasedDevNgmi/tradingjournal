@@ -2,11 +2,12 @@
 
 import { useTrades } from "@/context/trade-context";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, Trash2, CheckCircle2, XCircle, Clock, Image as ImageIcon, ExternalLink } from "lucide-react";
+import { ChevronLeft, Trash2, CheckCircle2, XCircle, Clock, Image as ImageIcon, ExternalLink, Edit2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState, use } from "react";
+import Link from "next/link";
 
 export default function TradeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -242,6 +243,16 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
               </button>
             </div>
           )}
+
+          <Link href={`/trade/${trade.id}/edit`} className="w-full">
+            <Button 
+              variant="outline"
+              className="w-full h-16 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+            >
+              <Edit2 className="mr-2" />
+              Edit Trade
+            </Button>
+          </Link>
 
           <Button 
             onClick={handleDelete}
