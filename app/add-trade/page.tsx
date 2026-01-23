@@ -8,6 +8,8 @@ import * as z from "zod";
 import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTrades } from "@/context/trade-context";
+import { Trade } from "@/types";
 
 const tradeSchema = z.object({
   pair: z.string().min(1, "Pair is required (e.g. BTC/USDT)"),
@@ -24,6 +26,7 @@ type TradeFormValues = z.infer<typeof tradeSchema>;
 
 export default function AddTradePage() {
   const router = useRouter();
+  const { addTrade } = useTrades();
   const [calculatedRR, setCalculatedRR] = useState<number | null>(null);
 
   const {
@@ -64,8 +67,23 @@ export default function AddTradePage() {
   }, [watchAllFields]);
 
   const onSubmit = (data: TradeFormValues) => {
-    console.log("Trade Data:", data);
-    alert("Trade added! (Check console for data)");
+    const newTrade: Trade = {
+      id: crypto.randomUUID(),
+      pair: data.pair.toUpperCase(),
+      direction: data.direction,
+      status: 'Open',
+      date: new Date().toISOString(),
+      entryPrice: data.entryPrice,
+      stopLoss: data.stopLoss,
+      takeProfit: data.takeProfit,
+      rrPredicted: calculatedRR || 0,
+      setupType: data.setupType,
+      confluences: data.confluences ? data.confluences.split(',').map(s => s.trim()) : [],
+      notes: data.notes,
+      tags: [], // Initial tags could be added here
+    };
+
+    addTrade(newTrade);
     router.push("/");
   };
 
@@ -74,7 +92,8 @@ export default function AddTradePage() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <button 
-          onClick={() => router.back()}
+          type="button"
+          onClick={() => router.push('/')}
           className="p-2 border-2 border-black hover:bg-zinc-100 transition-all active:translate-y-1"
         >
           <ChevronLeft size={24} />

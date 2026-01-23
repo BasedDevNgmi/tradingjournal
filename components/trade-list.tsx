@@ -1,17 +1,24 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { MOCK_TRADES } from "@/lib/mock-data";
+import { useState, useMemo, useEffect } from "react";
+import { useTrades } from "@/context/trade-context";
 import { TradeCard } from "./trade-card";
 import { FilterBar, FilterType } from "./filter-bar";
 import { Ghost } from "lucide-react";
 
 export function TradeList() {
+  const { trades } = useTrades();
   const [filter, setFilter] = useState<FilterType>('All');
   const [sortBy, setSortBy] = useState<string>('newest');
+  const [mounted, setMounted] = useState(false);
+
+  // Avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const filteredAndSortedTrades = useMemo(() => {
-    let result = [...MOCK_TRADES];
+    let result = [...trades];
 
     // Filtering
     if (filter !== 'All') {
@@ -30,7 +37,17 @@ export function TradeList() {
     }
 
     return result;
-  }, [filter, sortBy]);
+  }, [trades, filter, sortBy]);
+
+  if (!mounted) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-48 border-4 border-black bg-zinc-50" />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
