@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTrades } from "@/context/trade-context";
 import { Trade } from "@/types";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 const tradeSchema = z.object({
   pair: z.string().min(1, "Pair is required (e.g. BTC/USDT)"),
@@ -20,6 +21,7 @@ const tradeSchema = z.object({
   setupType: z.string().min(1, "Setup type is required"),
   confluences: z.string().optional(),
   notes: z.string().optional(),
+  screenshotUrl: z.string().optional(),
 });
 
 type TradeFormValues = z.infer<typeof tradeSchema>;
@@ -80,6 +82,7 @@ export default function AddTradePage() {
       setupType: data.setupType,
       confluences: data.confluences ? data.confluences.split(',').map(s => s.trim()) : [],
       notes: data.notes,
+      screenshotUrl: data.screenshotUrl || undefined,
       tags: [], // Initial tags could be added here
     };
 
@@ -206,11 +209,20 @@ export default function AddTradePage() {
           <div className="space-y-2">
             <label className="text-xs font-black uppercase tracking-widest text-zinc-500">Confluences</label>
             <textarea
-              {...register("confluences")}
-              placeholder="VWAP, Daily Open, Fib 0.618..."
-              rows={3}
+              {...register("notes")}
+              placeholder="Any extra thoughts..."
+              rows={2}
               className="w-full p-4 text-lg font-bold border-4 border-black outline-none focus:bg-yellow-50 resize-none"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-black uppercase tracking-widest text-zinc-500">Screenshot</label>
+            <ImageUpload 
+              value={watch("screenshotUrl")} 
+              onChange={(val) => setValue("screenshotUrl", val)} 
+            />
+            {errors.screenshotUrl && <p className="text-red-600 text-xs font-bold uppercase">{errors.screenshotUrl.message}</p>}
           </div>
         </section>
 

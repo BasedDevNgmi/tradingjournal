@@ -2,7 +2,7 @@
 
 import { useTrades } from "@/context/trade-context";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, Trash2, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { ChevronLeft, Trash2, CheckCircle2, XCircle, Clock, Image as ImageIcon, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -162,6 +162,31 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
                 <div>
                   <p className="text-[10px] font-black uppercase text-zinc-400">Notes</p>
                   <p className="text-sm font-medium italic mt-1">{trade.notes}</p>
+                </div>
+              )}
+              {trade.screenshotUrl && (
+                <div className="pt-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-black uppercase text-zinc-400">Screenshot</p>
+                    <a 
+                      href={trade.screenshotUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-[10px] font-black uppercase underline flex items-center gap-1"
+                    >
+                      Open Original <ExternalLink size={10} />
+                    </a>
+                  </div>
+                  <div className="border-4 border-black overflow-hidden bg-zinc-100">
+                    <img 
+                      src={trade.screenshotUrl} 
+                      alt={`Chart for ${trade.pair}`}
+                      className="w-full h-auto block"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://placehold.co/600x400?text=Invalid+Image+URL";
+                      }}
+                    />
+                  </div>
                 </div>
               )}
             </div>

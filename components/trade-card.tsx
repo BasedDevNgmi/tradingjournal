@@ -2,6 +2,7 @@ import { Trade } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { Image as ImageIcon } from "lucide-react";
 
 export function TradeCard({ trade }: { trade: Trade }) {
   const isWin = trade.status === "Win";
@@ -20,9 +21,12 @@ export function TradeCard({ trade }: { trade: Trade }) {
       <div className="bg-white border-4 border-black p-4 flex flex-col gap-4 hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all cursor-pointer shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] h-full">
         {/* Header */}
         <div className="flex justify-between items-start">
-          <h3 className="text-xl font-black uppercase tracking-tighter">
-            {trade.pair}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-xl font-black uppercase tracking-tighter">
+              {trade.pair}
+            </h3>
+            {trade.screenshotUrl && <ImageIcon size={16} className="text-zinc-400" />}
+          </div>
           <span className="text-[10px] font-bold text-zinc-400 uppercase">
             {dateFormatted}
           </span>

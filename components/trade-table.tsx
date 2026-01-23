@@ -4,7 +4,7 @@ import { Trade } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Image as ImageIcon } from "lucide-react";
 
 interface TradeTableProps {
   trades: Trade[];
@@ -46,7 +46,10 @@ export function TradeTable({ trades }: TradeTableProps) {
                   {dateFormatted}
                 </td>
                 <td className="p-4">
-                  <span className="font-black uppercase tracking-tighter text-lg">{trade.pair}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black uppercase tracking-tighter text-lg">{trade.pair}</span>
+                    {trade.screenshotUrl && <ImageIcon size={14} className="text-zinc-400" />}
+                  </div>
                 </td>
                 <td className="p-4 hidden sm:table-cell">
                   <Badge variant={trade.direction === "Long" ? "success" : "destructive"}>

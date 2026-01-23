@@ -17,4 +17,5 @@ export interface Trade {
   confluences: string[];
   notes?: string;
   tags: string[];
+  screenshotUrl?: string;
 }
