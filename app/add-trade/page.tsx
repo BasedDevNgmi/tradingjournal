@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { useTrades } from "@/context/trade-context";
 import { Trade } from "@/types";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { toast } from "sonner";
+import { PSYCHO_TAGS } from "@/lib/constants";
 
 const tradeSchema = z.object({
   pair: z.string().min(1, "Pair is required (e.g. BTC/USDT)"),
@@ -22,6 +24,7 @@ const tradeSchema = z.object({
   confluences: z.string().optional(),
   notes: z.string().optional(),
   screenshotUrl: z.string().optional(),
+  psychoTags: z.array(z.string()).default([]),
 });
 
 type TradeFormValues = z.infer<typeof tradeSchema>;
@@ -41,11 +44,24 @@ export default function AddTradePage() {
     resolver: zodResolver(tradeSchema),
     defaultValues: {
       direction: "Long",
+      psychoTags: [],
     },
   });
 
   const watchAllFields = watch();
   const direction = watch("direction");
+  const selectedPsychoTags = watch("psychoTags") || [];
+
+  const togglePsychoTag = (tag: string) => {
+    const currentTags = [...selectedPsychoTags];
+    const index = currentTags.indexOf(tag);
+    if (index === -1) {
+      currentTags.push(tag);
+    } else {
+      currentTags.splice(index, 1);
+    }
+    setValue("psychoTags", currentTags);
+  };
 
   // R:R Calculation Logic
   useEffect(() => {
@@ -83,10 +99,14 @@ export default function AddTradePage() {
       confluences: data.confluences ? data.confluences.split(',').map(s => s.trim()) : [],
       notes: data.notes,
       screenshotUrl: data.screenshotUrl,
+      psychoTags: data.psychoTags,
       tags: [],
     };
 
     addTrade(newTrade);
+    toast.success("Trade Logged!", {
+      description: `Predicted: ${newTrade.rrPredicted.toFixed(2)}R`,
+    });
     router.push("/");
   };
 
@@ -228,6 +248,28 @@ export default function AddTradePage() {
               rows={2}
               className="w-full p-4 text-lg font-bold border-4 border-black bg-white outline-none focus:bg-yellow-50 resize-none"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-black uppercase tracking-widest text-zinc-500">Trading Psychology</label>
+            <div className="flex flex-wrap gap-2">
+              {PSYCHO_TAGS.map((tag) => {
+                const isSelected = selectedPsychoTags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => togglePsychoTag(tag)}
+                    className={cn(
+                      "px-4 py-2 text-xs font-black uppercase tracking-widest border-2 border-black transition-all active:translate-y-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
+                      isSelected ? "bg-black text-white" : "bg-white text-black hover:bg-zinc-50"
+                    )}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="space-y-2">

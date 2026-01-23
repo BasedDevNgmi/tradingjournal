@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState, use } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function TradeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -39,6 +40,9 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this trade? This cannot be undone.")) {
       deleteTrade(trade.id);
+      toast.error("Trade Deleted", {
+        description: `${trade.pair} has been removed.`
+      });
       router.push("/");
     }
   };
@@ -65,6 +69,10 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
       status,
       exitPrice: price,
       rrRealized: parseFloat(realizedRR.toFixed(2)),
+    });
+    
+    toast.success("Trade Closed!", {
+      description: `Result: ${realizedRR.toFixed(2)}R`
     });
     setIsClosing(false);
   };
@@ -159,6 +167,18 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
                   ))}
                 </div>
               </div>
+              {trade.psychoTags && trade.psychoTags.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-black uppercase text-zinc-400 mb-2">Mindset during trade</p>
+                  <div className="flex flex-wrap gap-2">
+                    {trade.psychoTags.map((tag, i) => (
+                      <span key={i} className="text-xs font-black uppercase border-2 border-black px-2 py-1 bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
               {trade.notes && (
                 <div>
                   <p className="text-[10px] font-black uppercase text-zinc-400">Notes</p>

@@ -18,4 +18,5 @@ export interface Trade {
   notes?: string;
   tags: string[];
   screenshotUrl?: string;
+  psychoTags?: string[];
 }

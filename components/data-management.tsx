@@ -4,6 +4,7 @@ import { useTrades } from "@/context/trade-context";
 import { Button } from "@/components/ui/button";
 import { Download, Upload, AlertTriangle } from "lucide-react";
 import { useRef } from "react";
+import { toast } from "sonner";
 
 export function DataManagement() {
   const { trades, importTrades } = useTrades();
@@ -39,14 +40,20 @@ export function DataManagement() {
           if (isValid) {
             if (window.confirm("This will overwrite your current trades. Are you sure you want to proceed?")) {
               importTrades(importedData);
-              alert("Data restored successfully!");
+              toast.success("BACKUP RESTORED", {
+                description: `Imported ${importedData.length} trades successfully.`
+              });
             }
           } else {
-            alert("Invalid data format. Please check the backup file.");
+            toast.error("IMPORT FAILED", {
+              description: "Invalid data format. Please check the backup file."
+            });
           }
         }
       } catch (err) {
-        alert("Error reading file. Please make sure it's a valid JSON file.");
+        toast.error("IMPORT ERROR", {
+          description: "Could not read file. Make sure it's a valid JSON."
+        });
       }
     };
 
