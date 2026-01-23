@@ -10,6 +10,11 @@ interface FilterBarProps {
   onFilterChange: (filter: FilterType) => void;
   activeSort: string;
   onSortChange: (sort: string) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  selectedSetup: string;
+  onSetupChange: (setup: string) => void;
+  uniqueSetups: string[];
   viewMode: 'grid' | 'table';
   onViewModeChange: (mode: 'grid' | 'table') => void;
 }
@@ -19,6 +24,11 @@ export function FilterBar({
   onFilterChange, 
   activeSort, 
   onSortChange,
+  searchQuery,
+  onSearchChange,
+  selectedSetup,
+  onSetupChange,
+  uniqueSetups,
   viewMode,
   onViewModeChange
 }: FilterBarProps) {
@@ -26,6 +36,31 @@ export function FilterBar({
 
   return (
     <div className="space-y-4">
+      {/* Search and Setup Filter Row */}
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search pair or notes..."
+            className="w-full bg-white border-4 border-black p-3 text-sm font-bold uppercase tracking-tight outline-none focus:bg-yellow-50 placeholder:text-zinc-400 transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+          />
+        </div>
+        <div className="w-full md:w-64">
+          <select
+            value={selectedSetup}
+            onChange={(e) => onSetupChange(e.target.value)}
+            className="w-full appearance-none bg-white border-4 border-black p-3 text-sm font-black uppercase tracking-widest outline-none focus:bg-yellow-50 cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+          >
+            <option value="all">All Setups</option>
+            {uniqueSetups.map(setup => (
+              <option key={setup} value={setup}>{setup}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between gap-4">
         {/* Horizontal Scrollable Container for Filters and Sort */}
         <div className="flex-1 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -38,7 +73,7 @@ export function FilterBar({
                 className={cn(
                   "shrink-0 px-4 py-1.5 text-xs font-black uppercase tracking-widest border-2 border-black transition-all active:translate-y-[2px]",
                   activeFilter === filter 
-                    ? "bg-black text-white" 
+                    ? "bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" 
                     : "bg-white text-black hover:bg-zinc-100"
                 )}
               >
@@ -64,7 +99,7 @@ export function FilterBar({
           </div>
         </div>
         
-        {/* View Toggle - Hidden on very small screens or kept if space permits */}
+        {/* View Toggle - Hidden on very small screens */}
         <div className="hidden md:flex items-center shrink-0 border-2 border-black h-[34px]">
           <button
             onClick={() => onViewModeChange('grid')}

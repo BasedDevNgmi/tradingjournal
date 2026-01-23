@@ -12,6 +12,8 @@ export function TradeList() {
   const { trades } = useTrades();
   const [filter, setFilter] = useState<FilterType>('All');
   const [sortBy, setSortBy] = useState<string>('newest');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSetup, setSelectedSetup] = useState("all");
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const [mounted, setMounted] = useState(false);
 
@@ -20,12 +22,31 @@ export function TradeList() {
     setMounted(true);
   }, []);
 
+  const uniqueSetups = useMemo(() => {
+    const setups = new Set(trades.map(t => t.setupType));
+    return Array.from(setups).sort();
+  }, [trades]);
+
   const filteredAndSortedTrades = useMemo(() => {
     let result = [...trades];
 
-    // Filtering
+    // Status Filtering
     if (filter !== 'All') {
       result = result.filter(trade => trade.status === filter);
+    }
+
+    // Setup Filtering
+    if (selectedSetup !== 'all') {
+      result = result.filter(trade => trade.setupType === selectedSetup);
+    }
+
+    // Text Search
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(trade => 
+        trade.pair.toLowerCase().includes(query) || 
+        (trade.notes && trade.notes.toLowerCase().includes(query))
+      );
     }
 
     // Sorting
@@ -40,7 +61,7 @@ export function TradeList() {
     }
 
     return result;
-  }, [trades, filter, sortBy]);
+  }, [trades, filter, sortBy, searchQuery, selectedSetup]);
 
   if (!mounted) {
     return (
@@ -62,6 +83,11 @@ export function TradeList() {
         onFilterChange={setFilter}
         activeSort={sortBy}
         onSortChange={setSortBy}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        selectedSetup={selectedSetup}
+        onSetupChange={setSelectedSetup}
+        uniqueSetups={uniqueSetups}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
       />
