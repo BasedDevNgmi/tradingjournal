@@ -9,6 +9,7 @@ interface TradesContextType {
   addTrade: (trade: Trade) => void;
   updateTrade: (id: string, updatedData: Partial<Trade>) => void;
   deleteTrade: (id: string) => void;
+  importTrades: (trades: Trade[]) => void;
 }
 
 const TradesContext = createContext<TradesContextType | undefined>(undefined);
@@ -54,8 +55,12 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
     setTrades((prev) => prev.filter((trade) => trade.id !== id));
   };
 
+  const importTrades = (newTrades: Trade[]) => {
+    setTrades(newTrades);
+  };
+
   return (
-    <TradesContext.Provider value={{ trades, addTrade, updateTrade, deleteTrade }}>
+    <TradesContext.Provider value={{ trades, addTrade, updateTrade, deleteTrade, importTrades }}>
       {children}
     </TradesContext.Provider>
   );

@@ -1,5 +1,6 @@
 import { TradeList } from "@/components/trade-list";
 import { StatsOverview } from "@/components/stats-overview";
+import { DataManagement } from "@/components/data-management";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -28,8 +29,13 @@ export default function Home() {
       <StatsOverview />
 
       {/* Main Content */}
-      <div className="pt-4">
+      <div className="pt-4 space-y-12">
         <TradeList />
+        
+        {/* Data Management Section at the bottom */}
+        <div className="pt-12 border-t-4 border-black">
+          <DataManagement />
+        </div>
       </div>
       
       <footer className="pt-12 pb-8 flex flex-col sm:flex-row justify-between items-center gap-4 border-t-4 border-black mt-12">
