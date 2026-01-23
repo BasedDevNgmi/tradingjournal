@@ -185,28 +185,58 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
                   <p className="text-sm font-medium italic mt-1">{trade.notes}</p>
                 </div>
               )}
-              {trade.screenshotUrl && (
-                <div className="pt-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-black uppercase text-zinc-400">Screenshot</p>
-                    <a 
-                      href={trade.screenshotUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-[10px] font-black uppercase underline flex items-center gap-1"
-                    >
-                      Open Original <ExternalLink size={10} />
-                    </a>
-                  </div>
-                  <div className="border-4 border-black overflow-hidden bg-zinc-100">
-                    <img 
-                      src={trade.screenshotUrl} 
-                      alt={`Chart for ${trade.pair}`}
-                      className="w-full h-auto block"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "https://placehold.co/600x400?text=Invalid+Image+URL";
-                      }}
-                    />
+              
+              {(trade.beforeScreenshotUrl || trade.afterScreenshotUrl) && (
+                <div className="pt-8 space-y-8">
+                  <h3 className="font-black uppercase tracking-tight text-xl border-b-4 border-black pb-2">Charts / Visuals</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Before Screenshot */}
+                    {trade.beforeScreenshotUrl && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] font-black uppercase text-zinc-400">Before (Setup)</p>
+                          <a 
+                            href={trade.beforeScreenshotUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-[10px] font-black uppercase underline flex items-center gap-1"
+                          >
+                            Open <ExternalLink size={10} />
+                          </a>
+                        </div>
+                        <div className="border-4 border-black overflow-hidden bg-zinc-100">
+                          <img 
+                            src={trade.beforeScreenshotUrl} 
+                            alt="Before trade setup"
+                            className="w-full h-auto block object-contain"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* After Screenshot */}
+                    {trade.afterScreenshotUrl && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] font-black uppercase text-zinc-400">After (Result)</p>
+                          <a 
+                            href={trade.afterScreenshotUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-[10px] font-black uppercase underline flex items-center gap-1"
+                          >
+                            Open <ExternalLink size={10} />
+                          </a>
+                        </div>
+                        <div className="border-4 border-black overflow-hidden bg-zinc-100">
+                          <img 
+                            src={trade.afterScreenshotUrl} 
+                            alt="After trade result"
+                            className="w-full h-auto block object-contain"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

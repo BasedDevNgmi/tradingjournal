@@ -23,7 +23,8 @@ const tradeSchema = z.object({
   setupType: z.string().min(1, "Setup type is required"),
   confluences: z.string().optional(),
   notes: z.string().optional(),
-  screenshotUrl: z.string().optional(),
+  beforeScreenshotUrl: z.string().optional(),
+  afterScreenshotUrl: z.string().optional(),
   psychoTags: z.array(z.string()).default([]),
 });
 
@@ -98,7 +99,8 @@ export default function AddTradePage() {
       setupType: data.setupType,
       confluences: data.confluences ? data.confluences.split(',').map(s => s.trim()) : [],
       notes: data.notes,
-      screenshotUrl: data.screenshotUrl,
+      beforeScreenshotUrl: data.beforeScreenshotUrl,
+      afterScreenshotUrl: data.afterScreenshotUrl,
       psychoTags: data.psychoTags,
       tags: [],
     };
@@ -272,12 +274,21 @@ export default function AddTradePage() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-zinc-500">Screenshot</label>
-            <ImageUpload 
-              value={watch("screenshotUrl")} 
-              onChange={(val) => setValue("screenshotUrl", val)} 
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-zinc-500">Before Chart (Setup)</label>
+              <ImageUpload 
+                value={watch("beforeScreenshotUrl")} 
+                onChange={(val) => setValue("beforeScreenshotUrl", val)} 
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-zinc-500">After Chart (Result)</label>
+              <ImageUpload 
+                value={watch("afterScreenshotUrl")} 
+                onChange={(val) => setValue("afterScreenshotUrl", val)} 
+              />
+            </div>
           </div>
         </section>
 

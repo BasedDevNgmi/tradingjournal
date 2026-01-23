@@ -25,7 +25,7 @@ export function TradeCard({ trade }: { trade: Trade }) {
             <h3 className="text-xl font-black uppercase tracking-tighter text-black">
               {trade.pair}
             </h3>
-            {trade.screenshotUrl && <ImageIcon size={16} className="text-zinc-400" />}
+            {(trade.beforeScreenshotUrl || trade.afterScreenshotUrl) && <ImageIcon size={16} className="text-zinc-400" />}
           </div>
           <span className="text-[10px] font-bold text-zinc-400 uppercase">
             {dateFormatted}
