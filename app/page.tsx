@@ -1,47 +1,66 @@
+"use client";
+
+import { useState } from "react";
 import { TradeList } from "@/components/trade-list";
 import { StatsOverview } from "@/components/stats-overview";
 import { EquityChart } from "@/components/equity-chart";
 import { CalendarView } from "@/components/calendar-view";
 import { DataManagement } from "@/components/data-management";
+import { TabSwitcher, TabType } from "@/components/tab-switcher";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<TabType>('journal');
+
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="p-4 md:p-8 space-y-6">
       <header className="border-b-4 border-black pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">
+          <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-black">
             Trading Journal
           </h1>
           <p className="text-sm font-bold uppercase tracking-widest text-zinc-500 mt-2">
             Suen System / Superflat Edition
           </p>
         </div>
-        <Link href="/add-trade">
-          <Button className="w-full sm:w-auto shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1">
-            <Plus className="mr-2" size={20} strokeWidth={3} />
-            Add Trade
+        <Link href="/add-trade" className="fixed bottom-6 right-4 z-50 sm:static">
+          <Button className="w-full sm:w-auto shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 bg-yellow-300 text-black border-4 border-black h-16 sm:h-12 px-8">
+            <Plus className="mr-2" size={24} strokeWidth={4} />
+            <span className="font-black">Add Trade</span>
           </Button>
         </Link>
       </header>
 
-      {/* Stats Section */}
+      {/* Stats Section - Always visible above tabs for quick reference */}
       <StatsOverview />
 
-      {/* Charts & Consistency Section */}
-      <div className="grid grid-cols-1 gap-8">
-        <EquityChart />
-        <CalendarView />
-      </div>
+      {/* Tab Switcher */}
+      <TabSwitcher activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* Main Content */}
-      <div className="pt-4 space-y-12">
-        <TradeList />
+      {/* Conditional Content Based on Active Tab */}
+      <div className="pt-4">
+        {activeTab === 'journal' ? (
+          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <TradeList />
+          </div>
+        ) : (
+          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <section className="space-y-4">
+              <h2 className="text-2xl font-black uppercase tracking-tight italic border-l-8 border-black pl-4">Performance Curve</h2>
+              <EquityChart />
+            </section>
+            
+            <section className="space-y-4">
+              <h2 className="text-2xl font-black uppercase tracking-tight italic border-l-8 border-black pl-4">Consistency Calendar</h2>
+              <CalendarView />
+            </section>
+          </div>
+        )}
         
         {/* Data Management Section at the bottom */}
-        <div className="pt-12 border-t-4 border-black">
+        <div className="pt-12 mt-12 border-t-4 border-black">
           <DataManagement />
         </div>
       </div>

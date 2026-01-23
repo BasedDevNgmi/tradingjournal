@@ -51,60 +51,60 @@ export function StatsOverview() {
     }
   }
 
+  const statCards = [
+    {
+      label: "Total R",
+      value: `${totalR > 0 ? '+' : ''}${totalR.toFixed(1)}R`,
+      valueClass: totalR > 0 ? "text-green-600" : totalR < 0 ? "text-red-600" : "text-black",
+      streak: null
+    },
+    {
+      label: "Win Rate",
+      value: `${winRate.toFixed(0)}%`,
+      valueClass: "text-black",
+      streak: currentStreak > 1 ? {
+        count: currentStreak,
+        status: closedTrades[0].status
+      } : null
+    },
+    {
+      label: "Open",
+      value: openTrades,
+      valueClass: "text-blue-600",
+      streak: null
+    },
+    {
+      label: "Journal",
+      value: totalTrades,
+      valueClass: "text-black",
+      streak: null
+    }
+  ];
+
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      {/* Block 1: Total R */}
-      <Card className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <CardContent className="p-4 flex flex-col justify-center min-h-[100px]">
-          <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1">Total R</p>
-          <p className={cn(
-            "text-3xl font-black tracking-tighter",
-            totalR > 0 ? "text-green-600" : totalR < 0 ? "text-red-600" : "text-black"
-          )}>
-            {totalR > 0 ? '+' : ''}{totalR.toFixed(1)}R
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Block 2: Win Rate */}
-      <Card className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <CardContent className="p-4 flex flex-col justify-center min-h-[100px]">
-          <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1">Win Rate</p>
-          <div className="flex items-baseline gap-2">
-            <p className="text-3xl font-black tracking-tighter">
-              {winRate.toFixed(0)}%
-            </p>
-            {currentStreak > 1 && (
-              <span className={cn(
-                "text-[10px] font-black px-1 border border-black",
-                closedTrades[0].status === 'Win' ? "bg-green-400" : "bg-red-400"
-              )}>
-                {currentStreak} STREAK
-              </span>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Block 3: Open Trades */}
-      <Card className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <CardContent className="p-4 flex flex-col justify-center min-h-[100px]">
-          <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1">Open</p>
-          <p className="text-3xl font-black tracking-tighter text-blue-600">
-            {openTrades}
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Block 4: Total Trades */}
-      <Card className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <CardContent className="p-4 flex flex-col justify-center min-h-[100px]">
-          <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1">Journal</p>
-          <p className="text-3xl font-black tracking-tighter">
-            {totalTrades}
-          </p>
-        </CardContent>
-      </Card>
+    <div className="flex overflow-x-auto snap-x snap-mandatory pb-8 gap-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-4 md:overflow-visible mb-4">
+      {statCards.map((card, i) => (
+        <div key={i} className="w-[75%] shrink-0 snap-start md:w-full">
+          <Card className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] h-full">
+            <CardContent className="p-4 flex flex-col justify-center min-h-[100px]">
+              <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1">{card.label}</p>
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <p className={cn("text-3xl font-black tracking-tighter", card.valueClass)}>
+                  {card.value}
+                </p>
+                {card.streak && (
+                  <span className={cn(
+                    "text-[10px] font-black px-1 border border-black whitespace-nowrap",
+                    card.streak.status === 'Win' ? "bg-green-400 text-black" : "bg-red-400 text-black"
+                  )}>
+                    {card.streak.count} STREAK
+                  </span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ))}
     </div>
   );
 }

@@ -1,10 +1,9 @@
 import * as React from "react"
-import { slot } from "radix-ui" // Note: if radix is not installed, we use a simple approach
 import { cn } from "@/lib/utils"
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'outline' | 'ghost'
+  variant?: 'default' | 'outline' | 'ghost' | 'destructive'
   size?: 'default' | 'sm' | 'lg' | 'icon'
 }
 
@@ -17,6 +16,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           variant === 'default' && "bg-black text-white hover:bg-zinc-800",
           variant === 'outline' && "bg-white text-black hover:bg-zinc-100",
           variant === 'ghost' && "border-transparent hover:bg-zinc-100",
+          variant === 'destructive' && "bg-red-400 text-black hover:bg-red-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
           size === 'default' && "h-12 px-6 py-2",
           size === 'sm' && "h-10 px-4 text-xs",
           size === 'lg' && "h-14 px-10 text-lg",

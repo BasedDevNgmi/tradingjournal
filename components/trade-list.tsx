@@ -4,14 +4,14 @@ import { useState, useMemo, useEffect } from "react";
 import { useTrades } from "@/context/trade-context";
 import { TradeCard } from "./trade-card";
 import { TradeTable } from "./trade-table";
-import { FilterBar, FilterType, ViewMode } from "./filter-bar";
+import { FilterBar, FilterType } from "./filter-bar";
 import { Ghost } from "lucide-react";
 
 export function TradeList() {
   const { trades } = useTrades();
   const [filter, setFilter] = useState<FilterType>('All');
   const [sortBy, setSortBy] = useState<string>('newest');
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch
@@ -43,10 +43,13 @@ export function TradeList() {
 
   if (!mounted) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-48 border-4 border-black bg-zinc-50" />
-        ))}
+      <div className="space-y-8 animate-pulse">
+        <div className="h-12 bg-zinc-50 border-4 border-black" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-48 border-4 border-black bg-zinc-50" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -74,14 +77,14 @@ export function TradeList() {
         )
       ) : (
         <div className="flex flex-col items-center justify-center py-20 border-4 border-dashed border-black bg-zinc-50">
-          <Ghost size={48} className="mb-4" />
-          <h3 className="text-xl font-black uppercase tracking-tighter">No trades found</h3>
-          <p className="text-sm font-bold uppercase text-zinc-500 mt-2">
+          <Ghost size={48} className="mb-4 text-black" />
+          <h3 className="text-xl font-black uppercase tracking-tighter text-black">No trades found</h3>
+          <p className="text-sm font-bold uppercase text-zinc-500 mt-2 text-center px-4">
             No trades found within these filters. Go take a setup!
           </p>
           <button 
             onClick={() => setFilter('All')}
-            className="mt-6 text-xs font-black uppercase underline decoration-2 underline-offset-4"
+            className="mt-6 text-xs font-black uppercase underline decoration-2 underline-offset-4 text-black"
           >
             Clear all filters
           </button>

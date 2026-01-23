@@ -45,7 +45,7 @@ export function TradeTable({ trades }: TradeTableProps) {
                 <td className="p-4 text-xs font-bold uppercase text-zinc-400">
                   {dateFormatted}
                 </td>
-                <td className="p-4">
+                <td className="p-4 text-black">
                   <div className="flex items-center gap-2">
                     <span className="font-black uppercase tracking-tighter text-lg">{trade.pair}</span>
                     {trade.screenshotUrl && <ImageIcon size={14} className="text-zinc-400" />}

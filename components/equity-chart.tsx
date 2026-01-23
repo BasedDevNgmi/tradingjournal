@@ -20,7 +20,7 @@ const CustomTooltip = ({ active, payload }: any) => {
         <p className="text-[10px] font-black uppercase text-zinc-400">
           {payload[0].payload.fullDate}
         </p>
-        <p className="text-lg font-black tracking-tighter">
+        <p className="text-lg font-black tracking-tighter text-black">
           {payload[0].value > 0 ? "+" : ""}
           {payload[0].value.toFixed(2)}R
         </p>
@@ -127,7 +127,7 @@ export function EquityChart() {
           </div>
         ) : (
           <div className="h-64 flex flex-col items-center justify-center text-center p-8 bg-zinc-50">
-            <p className="text-sm font-black uppercase tracking-tighter">No curve available</p>
+            <p className="text-sm font-black uppercase tracking-tighter text-black">No curve available</p>
             <p className="text-[10px] font-bold uppercase text-zinc-400 mt-2">
               Close your first trade to see the curve.
             </p>

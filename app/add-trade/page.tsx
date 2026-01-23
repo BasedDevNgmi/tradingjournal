@@ -82,8 +82,8 @@ export default function AddTradePage() {
       setupType: data.setupType,
       confluences: data.confluences ? data.confluences.split(',').map(s => s.trim()) : [],
       notes: data.notes,
-      screenshotUrl: data.screenshotUrl || undefined,
-      tags: [], // Initial tags could be added here
+      screenshotUrl: data.screenshotUrl,
+      tags: [],
     };
 
     addTrade(newTrade);
@@ -93,11 +93,11 @@ export default function AddTradePage() {
   return (
     <div className="p-4 md:p-8 max-w-2xl mx-auto space-y-8">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 text-black">
         <button 
           type="button"
           onClick={() => router.push('/')}
-          className="p-2 border-2 border-black hover:bg-zinc-100 transition-all active:translate-y-1"
+          className="p-2 border-2 border-black bg-white hover:bg-zinc-100 transition-all active:translate-y-1"
         >
           <ChevronLeft size={24} />
         </button>
@@ -113,7 +113,7 @@ export default function AddTradePage() {
               {...register("pair")}
               placeholder="e.g. BTC/USDT"
               className={cn(
-                "w-full p-4 text-xl font-black uppercase border-4 border-black outline-none focus:bg-yellow-50 transition-colors",
+                "w-full p-4 text-xl font-black uppercase border-4 border-black bg-white text-black outline-none focus:bg-yellow-50 transition-colors",
                 errors.pair && "border-red-500"
               )}
             />
@@ -128,7 +128,9 @@ export default function AddTradePage() {
                 onClick={() => setValue("direction", "Long")}
                 className={cn(
                   "p-4 text-xl font-black uppercase border-4 border-black transition-all active:translate-y-1",
-                  direction === "Long" ? "bg-green-400 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" : "bg-white text-zinc-400 border-zinc-200"
+                  direction === "Long" 
+                    ? "bg-green-400 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" 
+                    : "bg-white text-zinc-400 border-zinc-200"
                 )}
               >
                 Long
@@ -138,7 +140,9 @@ export default function AddTradePage() {
                 onClick={() => setValue("direction", "Short")}
                 className={cn(
                   "p-4 text-xl font-black uppercase border-4 border-black transition-all active:translate-y-1",
-                  direction === "Short" ? "bg-red-400 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" : "bg-white text-zinc-400 border-zinc-200"
+                  direction === "Short" 
+                    ? "bg-red-400 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" 
+                    : "bg-white text-zinc-400 border-zinc-200"
                 )}
               >
                 Short
@@ -148,7 +152,7 @@ export default function AddTradePage() {
         </section>
 
         {/* Section 2: Numbers & RR */}
-        <section className="p-6 border-4 border-black bg-zinc-50 space-y-6 relative overflow-hidden">
+        <section className="p-6 border-4 border-black bg-zinc-50 space-y-6 relative overflow-hidden transition-colors">
           <div className="absolute top-0 right-0 p-2 bg-black text-white text-[10px] font-black uppercase tracking-widest">
             Price Levels
           </div>
@@ -160,7 +164,7 @@ export default function AddTradePage() {
                 type="number"
                 step="any"
                 {...register("entryPrice", { valueAsNumber: true })}
-                className="w-full p-3 font-black border-2 border-black outline-none focus:bg-white"
+                className="w-full p-3 font-black border-2 border-black bg-white text-black outline-none focus:bg-white"
               />
             </div>
             <div className="space-y-2">
@@ -169,7 +173,7 @@ export default function AddTradePage() {
                 type="number"
                 step="any"
                 {...register("stopLoss", { valueAsNumber: true })}
-                className="w-full p-3 font-black border-2 border-black outline-none focus:bg-white"
+                className="w-full p-3 font-black border-2 border-black bg-white text-black outline-none focus:bg-white"
               />
             </div>
             <div className="space-y-2">
@@ -178,12 +182,12 @@ export default function AddTradePage() {
                 type="number"
                 step="any"
                 {...register("takeProfit", { valueAsNumber: true })}
-                className="w-full p-3 font-black border-2 border-black outline-none focus:bg-white"
+                className="w-full p-3 font-black border-2 border-black bg-white text-black outline-none focus:bg-white"
               />
             </div>
           </div>
 
-          <div className="pt-4 border-t-2 border-black flex justify-between items-center">
+          <div className="pt-4 border-t-2 border-black flex justify-between items-center text-black">
             <span className="text-sm font-black uppercase italic">Potential Risk/Reward:</span>
             <div className={cn(
               "text-4xl font-black tracking-tighter",
@@ -195,13 +199,13 @@ export default function AddTradePage() {
         </section>
 
         {/* Section 3: Setup & Confluences */}
-        <section className="space-y-6">
+        <section className="space-y-6 text-black">
           <div className="space-y-2">
             <label className="text-xs font-black uppercase tracking-widest text-zinc-500">Setup Type</label>
             <input
               {...register("setupType")}
               placeholder="e.g. SFP, Range Rotation"
-              className="w-full p-4 text-lg font-bold border-4 border-black outline-none focus:bg-yellow-50"
+              className="w-full p-4 text-lg font-bold border-4 border-black bg-white outline-none focus:bg-yellow-50"
             />
             {errors.setupType && <p className="text-red-600 text-xs font-bold uppercase">{errors.setupType.message}</p>}
           </div>
@@ -209,10 +213,20 @@ export default function AddTradePage() {
           <div className="space-y-2">
             <label className="text-xs font-black uppercase tracking-widest text-zinc-500">Confluences</label>
             <textarea
+              {...register("confluences")}
+              placeholder="VWAP, Daily Open, Fib 0.618..."
+              rows={3}
+              className="w-full p-4 text-lg font-bold border-4 border-black bg-white outline-none focus:bg-yellow-50 resize-none"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-black uppercase tracking-widest text-zinc-500">Notes</label>
+            <textarea
               {...register("notes")}
               placeholder="Any extra thoughts..."
               rows={2}
-              className="w-full p-4 text-lg font-bold border-4 border-black outline-none focus:bg-yellow-50 resize-none"
+              className="w-full p-4 text-lg font-bold border-4 border-black bg-white outline-none focus:bg-yellow-50 resize-none"
             />
           </div>
 
@@ -222,11 +236,13 @@ export default function AddTradePage() {
               value={watch("screenshotUrl")} 
               onChange={(val) => setValue("screenshotUrl", val)} 
             />
-            {errors.screenshotUrl && <p className="text-red-600 text-xs font-bold uppercase">{errors.screenshotUrl.message}</p>}
           </div>
         </section>
 
-        <Button type="submit" className="w-full h-20 text-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+        <Button 
+          type="submit" 
+          className="w-full h-20 text-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+        >
           <Plus className="mr-2" size={32} strokeWidth={4} />
           Save Trade
         </Button>

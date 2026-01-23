@@ -17,12 +17,12 @@ export function TradeCard({ trade }: { trade: Trade }) {
   });
 
   return (
-    <Link href={`/trade/${trade.id}`} className="block">
+    <Link href={`/trade/${trade.id}`} className="block h-full">
       <div className="bg-white border-4 border-black p-4 flex flex-col gap-4 hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all cursor-pointer shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] h-full">
         {/* Header */}
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-2">
-            <h3 className="text-xl font-black uppercase tracking-tighter">
+            <h3 className="text-xl font-black uppercase tracking-tighter text-black">
               {trade.pair}
             </h3>
             {trade.screenshotUrl && <ImageIcon size={16} className="text-zinc-400" />}
@@ -72,7 +72,7 @@ export function TradeCard({ trade }: { trade: Trade }) {
 
         {/* Footer */}
         <div className="border-t-2 border-black pt-2 flex justify-between items-center">
-          <span className="text-[10px] font-black uppercase bg-yellow-300 px-1 border border-black">
+          <span className="text-[10px] font-black uppercase bg-yellow-300 text-black px-1 border border-black">
             {trade.setupType}
           </span>
           <div className="flex gap-1">

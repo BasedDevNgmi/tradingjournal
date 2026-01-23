@@ -21,7 +21,7 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
   if (!trade) {
     return (
       <div className="p-8 text-center space-y-4">
-        <h1 className="text-2xl font-black uppercase">Trade not found</h1>
+        <h1 className="text-2xl font-black uppercase text-black">Trade not found</h1>
         <Button onClick={() => router.push("/")}>Back to Journal</Button>
       </div>
     );
@@ -69,12 +69,12 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-8 pb-24">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-8 pb-24 text-black transition-colors">
       {/* Header */}
       <div className="flex items-center gap-4">
         <button 
           onClick={() => router.push("/")}
-          className="p-2 border-2 border-black hover:bg-zinc-100 transition-all active:translate-y-1"
+          className="p-2 border-2 border-black bg-white hover:bg-zinc-100 transition-all active:translate-y-1"
         >
           <ChevronLeft size={24} />
         </button>
@@ -125,11 +125,11 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
               <h3 className="font-black uppercase tracking-widest text-sm border-b-2 border-white/20 pb-2">Execution</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[10px] font-black uppercase text-zinc-400">Exit Price</p>
+                  <p className="text-[10px] font-black uppercase text-zinc-400 italic">Exit Price</p>
                   <p className="text-2xl font-black italic">{trade.exitPrice}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase text-zinc-400">Realized R</p>
+                  <p className="text-[10px] font-black uppercase text-zinc-400 italic">Realized R</p>
                   <p className={cn(
                     "text-2xl font-black italic",
                     (trade.rrRealized || 0) > 0 ? "text-green-400" : "text-red-400"
@@ -146,7 +146,7 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
             <div className="brutalist-card space-y-4">
               <div>
                 <p className="text-[10px] font-black uppercase text-zinc-400">Setup Type</p>
-                <p className="font-black uppercase bg-yellow-300 inline-block px-2 border-2 border-black">{trade.setupType}</p>
+                <p className="font-black uppercase bg-yellow-300 text-black inline-block px-2 border-2 border-black">{trade.setupType}</p>
               </div>
               <div>
                 <p className="text-[10px] font-black uppercase text-zinc-400 mb-2">Confluences</p>
@@ -206,7 +206,7 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
           )}
 
           {isClosing && (
-            <div className="brutalist-card bg-yellow-50 space-y-4 border-dashed animate-in fade-in slide-in-from-top-4">
+            <div className="brutalist-card bg-yellow-50 space-y-4 border-dashed border-black animate-in fade-in slide-in-from-top-4">
               <h4 className="font-black uppercase text-sm">Close this trade</h4>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase">Exit Price</label>
@@ -215,7 +215,7 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
                   step="any"
                   value={exitPrice}
                   onChange={(e) => setExitPrice(e.target.value)}
-                  className="w-full p-2 border-2 border-black font-black outline-none focus:bg-white"
+                  className="w-full p-2 border-2 border-black bg-white font-black outline-none focus:bg-white"
                   placeholder="Enter exit price..."
                   autoFocus
                 />
@@ -223,13 +223,13 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
               <div className="grid grid-cols-2 gap-2">
                 <button 
                   onClick={() => handleCloseTrade('Win')}
-                  className="bg-green-400 border-2 border-black p-2 font-black uppercase text-xs hover:translate-x-1 hover:translate-y-1 transition-all"
+                  className="bg-green-400 border-2 border-black p-2 font-black uppercase text-xs hover:translate-x-1 hover:translate-y-1 transition-all text-black"
                 >
                   Win
                 </button>
                 <button 
                   onClick={() => handleCloseTrade('Loss')}
-                  className="bg-red-400 border-2 border-black p-2 font-black uppercase text-xs hover:translate-x-1 hover:translate-y-1 transition-all"
+                  className="bg-red-400 border-2 border-black p-2 font-black uppercase text-xs hover:translate-x-1 hover:translate-y-1 transition-all text-black"
                 >
                   Loss
                 </button>
