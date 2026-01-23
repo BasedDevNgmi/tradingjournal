@@ -1,4 +1,5 @@
 import { TradeList } from "@/components/trade-list";
+import { StatsOverview } from "@/components/stats-overview";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,13 @@ export default function Home() {
         </Link>
       </header>
 
-      <TradeList />
+      {/* Stats Section */}
+      <StatsOverview />
+
+      {/* Main Content */}
+      <div className="pt-4">
+        <TradeList />
+      </div>
       
       <footer className="pt-12 pb-8 flex flex-col sm:flex-row justify-between items-center gap-4 border-t-4 border-black mt-12">
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
