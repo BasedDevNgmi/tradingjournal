@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --border: #000000;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+  --font-inter: var(--font-inter);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Brutalist UI Utilities */
+@layer components {
+  .brutalist-card {
+    @apply border-4 border-black bg-white p-4;
+  }
+  
+  .brutalist-button {
+    @apply border-4 border-black bg-white px-4 py-2 font-bold transition-all active:translate-x-1 active:translate-y-1;
+  }
+
+  .brutalist-input {
+    @apply border-4 border-black bg-white p-2 outline-none focus:bg-yellow-50;
+  }
+}
