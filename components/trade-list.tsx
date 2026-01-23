@@ -6,6 +6,7 @@ import { TradeCard } from "./trade-card";
 import { TradeTable } from "./trade-table";
 import { FilterBar, FilterType } from "./filter-bar";
 import { Ghost } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function TradeList() {
   const { trades } = useTrades();
@@ -55,7 +56,7 @@ export function TradeList() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-32 md:pb-8">
       <FilterBar 
         activeFilter={filter} 
         onFilterChange={setFilter}
@@ -66,15 +67,25 @@ export function TradeList() {
       />
 
       {filteredAndSortedTrades.length > 0 ? (
-        viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <>
+          {/* Card View (Always visible on mobile, conditional on desktop) */}
+          <div className={cn(
+            "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+            viewMode === 'table' ? "md:hidden" : "block"
+          )}>
             {filteredAndSortedTrades.map((trade) => (
               <TradeCard key={trade.id} trade={trade} />
             ))}
           </div>
-        ) : (
-          <TradeTable trades={filteredAndSortedTrades} />
-        )
+
+          {/* Table View (Hidden on mobile, conditional on desktop) */}
+          <div className={cn(
+            "hidden md:block",
+            viewMode === 'grid' && "md:hidden"
+          )}>
+            <TradeTable trades={filteredAndSortedTrades} />
+          </div>
+        </>
       ) : (
         <div className="flex flex-col items-center justify-center py-20 border-4 border-dashed border-black bg-zinc-50">
           <Ghost size={48} className="mb-4 text-black" />

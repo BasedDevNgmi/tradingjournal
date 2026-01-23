@@ -26,9 +26,9 @@ export default function Home() {
           </p>
         </div>
         <Link href="/add-trade" className="fixed bottom-6 right-4 z-50 sm:static">
-          <Button className="w-full sm:w-auto shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 bg-yellow-300 text-black border-4 border-black h-16 sm:h-12 px-8">
-            <Plus className="mr-2" size={24} strokeWidth={4} />
-            <span className="font-black">Add Trade</span>
+          <Button className="w-16 h-16 sm:w-auto sm:h-12 rounded-full sm:rounded-none flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 bg-yellow-300 text-black border-4 border-black px-0 sm:px-8">
+            <Plus size={32} strokeWidth={4} className="sm:mr-2 sm:w-6 sm:h-6" />
+            <span className="font-black hidden sm:inline text-lg">Add Trade</span>
           </Button>
         </Link>
       </header>

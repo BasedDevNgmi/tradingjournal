@@ -34,4 +34,12 @@ body {
   .brutalist-input {
     @apply border-4 border-black bg-white p-2 outline-none focus:bg-yellow-50;
   }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }

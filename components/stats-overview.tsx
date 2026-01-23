@@ -82,19 +82,19 @@ export function StatsOverview() {
   ];
 
   return (
-    <div className="flex overflow-x-auto snap-x snap-mandatory pb-8 gap-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-4 md:overflow-visible mb-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4">
       {statCards.map((card, i) => (
-        <div key={i} className="w-[75%] shrink-0 snap-start md:w-full">
-          <Card className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] h-full">
-            <CardContent className="p-4 flex flex-col justify-center min-h-[100px]">
-              <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1">{card.label}</p>
-              <div className="flex items-baseline gap-2 flex-wrap">
-                <p className={cn("text-3xl font-black tracking-tighter", card.valueClass)}>
+        <div key={i} className="w-full">
+          <Card className="bg-white border-2 md:border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] h-full">
+            <CardContent className="p-2 md:p-4 flex flex-col justify-center min-h-[80px] md:min-h-[100px]">
+              <p className="text-xs md:text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1">{card.label}</p>
+              <div className="flex items-baseline gap-1 md:gap-2 flex-wrap">
+                <p className={cn("text-xl md:text-3xl font-black tracking-tighter leading-none", card.valueClass)}>
                   {card.value}
                 </p>
                 {card.streak && (
                   <span className={cn(
-                    "text-[10px] font-black px-1 border border-black whitespace-nowrap",
+                    "text-[10px] font-black px-1 border border-black whitespace-nowrap mt-1 md:mt-0",
                     card.streak.status === 'Win' ? "bg-green-400 text-black" : "bg-red-400 text-black"
                   )}>
                     {card.streak.count} STREAK
