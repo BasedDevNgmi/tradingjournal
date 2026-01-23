@@ -1,5 +1,7 @@
 import { TradeList } from "@/components/trade-list";
 import { StatsOverview } from "@/components/stats-overview";
+import { EquityChart } from "@/components/equity-chart";
+import { CalendarView } from "@/components/calendar-view";
 import { DataManagement } from "@/components/data-management";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -27,6 +29,12 @@ export default function Home() {
 
       {/* Stats Section */}
       <StatsOverview />
+
+      {/* Charts & Consistency Section */}
+      <div className="grid grid-cols-1 gap-8">
+        <EquityChart />
+        <CalendarView />
+      </div>
 
       {/* Main Content */}
       <div className="pt-4 space-y-12">
