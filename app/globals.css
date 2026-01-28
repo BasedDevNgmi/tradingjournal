@@ -68,6 +68,12 @@
   --radius-modal: var(--radius-modal);
 }
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -118,6 +124,9 @@ body {
   /* Skip link: off-screen until focused for keyboard/screen-reader users */
   .skip-link {
     @apply absolute left-0 top-0 z-[200] -translate-y-full rounded-b-md bg-primary-accent px-6 py-3 text-sm font-medium text-white shadow-lg outline-none transition-transform focus:translate-y-0;
+  }
+  .skip-link:not(:focus) {
+    clip-path: inset(100% 0 0 0);
   }
 
   /* Mobile scroll: momentum scrolling on iOS */
