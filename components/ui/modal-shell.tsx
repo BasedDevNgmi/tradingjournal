@@ -8,8 +8,8 @@ const MODAL_CONTENT_BASE =
   "p-0 overflow-hidden border border-border shadow-xl flex flex-col rounded-xl bg-card min-h-0";
 
 export const modalContentClass = {
-  add: cn(MODAL_CONTENT_BASE, "sm:max-w-[960px] h-[90vh]"),
-  detail: cn(MODAL_CONTENT_BASE, "sm:max-w-[980px] h-[85vh]"),
+  add: cn(MODAL_CONTENT_BASE, "sm:max-w-[960px] h-[90dvh]"),
+  detail: cn(MODAL_CONTENT_BASE, "sm:max-w-[980px] h-[85dvh]"),
 };
 
 interface ModalShellProps {

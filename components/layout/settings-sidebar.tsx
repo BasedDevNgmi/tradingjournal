@@ -35,7 +35,7 @@ export function SettingsSidebar({ isOpen, onClose }: SettingsSidebarProps) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "tween", duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed top-0 right-0 h-full w-80 bg-card border-l border-border z-[101] shadow-md p-8 space-y-8"
+            className="fixed top-0 right-0 h-full w-full max-w-[20rem] bg-card border-l border-border z-[101] shadow-md p-8 space-y-8"
           >
             <div className="flex items-center justify-between border-b border-border pb-6">
               <h2 className="text-lg font-semibold">Settings</h2>
@@ -47,7 +47,7 @@ export function SettingsSidebar({ isOpen, onClose }: SettingsSidebarProps) {
               </button>
             </div>
             
-            <div className="space-y-8 overflow-y-auto scrollbar-thin max-h-[calc(100vh-120px)]">
+            <div className="space-y-8 overflow-y-auto scrollbar-thin max-h-[calc(100dvh-120px)]">
               <section className="space-y-4">
                 <h3 className="text-xs font-medium text-muted-foreground">Privacy</h3>
                 <button 

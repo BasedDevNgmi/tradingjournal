@@ -39,7 +39,7 @@ const DialogContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "dialog-content pointer-events-auto w-full max-w-lg gap-4 border border-border bg-card shadow-xl rounded-xl md:max-w-3xl max-h-[90vh] overflow-hidden flex flex-col",
+          "dialog-content pointer-events-auto w-full max-w-lg gap-4 border border-border bg-card shadow-xl rounded-xl md:max-w-3xl max-h-[90dvh] overflow-hidden flex flex-col",
           className
         )}
         {...props}
