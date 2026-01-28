@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Command } from "cmdk";
-import { Search, BookOpen, BarChart3, Plus, Clock, Terminal, Zap, Settings } from "lucide-react";
+import { Search, BookOpen, BarChart3, Calendar, Plus, Clock, Terminal, Zap, Settings } from "lucide-react";
 import { useJournalNavigation } from "@/hooks/use-journal-navigation";
 import { useJournalFilters } from "@/hooks/use-journal-filters";
 import { useTradesData } from "@/context/trade-context";
@@ -72,15 +72,16 @@ export function CommandPalette() {
                 </Command.Empty>
 
                 <Command.Group heading="Navigation" className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                  <CommandItem onSelect={() => runCommand(() => setActiveTab('journal'))} icon={BookOpen} label="Journal" shortcut="G J" />
-                  <CommandItem onSelect={() => runCommand(() => setActiveTab('missed'))} icon={Clock} label="Missed setups" shortcut="G M" />
-                  <CommandItem onSelect={() => runCommand(() => setActiveTab('analytics'))} icon={BarChart3} label="Analytics" shortcut="G A" />
-                  <CommandItem onSelect={() => runCommand(() => setIsSettingsOpen(true))} icon={Settings} label="System settings" shortcut="S" />
+                  <CommandItem onSelect={() => runCommand(() => setActiveTab('journal'))} icon={BookOpen} label="Journal" />
+                  <CommandItem onSelect={() => runCommand(() => setActiveTab('missed'))} icon={Clock} label="Missed setups" />
+                  <CommandItem onSelect={() => runCommand(() => setActiveTab('calendar'))} icon={Calendar} label="Calendar" />
+                  <CommandItem onSelect={() => runCommand(() => setActiveTab('analytics'))} icon={BarChart3} label="Analytics" />
+                  <CommandItem onSelect={() => runCommand(() => setIsSettingsOpen(true))} icon={Settings} label="System settings" />
                 </Command.Group>
 
                 <Command.Group heading="Actions" className="px-2 py-1.5 mt-2 text-xs font-medium text-muted-foreground">
                   <CommandItem onSelect={() => runCommand(() => setIsAddModalOpen(true))} icon={Plus} label="Add new trade" shortcut="⌘N" color="text-primary-accent" />
-                  <CommandItem onSelect={() => runCommand(() => resetFilters())} icon={Zap} label="Reset filters" shortcut="X" />
+                  <CommandItem onSelect={() => runCommand(() => resetFilters())} icon={Zap} label="Reset filters" />
                 </Command.Group>
 
                 {trades.length > 0 && (

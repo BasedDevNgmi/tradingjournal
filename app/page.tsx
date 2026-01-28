@@ -6,6 +6,7 @@ import { TradeList } from "@/components/trade-list";
 import { Plus } from "lucide-react";
 
 import { AnalyticsSkeleton } from "@/components/analytics-skeleton";
+import { CalendarView } from "@/components/calendar-view";
 const AnalyticsView = dynamic(
   () => import("@/components/analytics-view").then((m) => ({ default: m.AnalyticsView })),
   { ssr: false, loading: () => <AnalyticsSkeleton /> }
@@ -158,6 +159,12 @@ export default function Home() {
                       mounted={mounted}
                       isMissedView={activeTab === 'missed'}
                     />
+                    </div>
+                  ) : activeTab === 'calendar' ? (
+                    <div className="flex-1 overflow-y-auto scrollbar-thin px-6 py-8">
+                      <GlobalErrorBoundary>
+                        <CalendarView />
+                      </GlobalErrorBoundary>
                     </div>
                   ) : (
                     <div className="flex-1 overflow-y-auto scrollbar-thin px-6 py-8">

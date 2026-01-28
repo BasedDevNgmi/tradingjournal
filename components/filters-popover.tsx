@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { getUniquePairsByFrequency } from "@/lib/pair-suggestions";
 import { useTradesData } from "@/context/trade-context";
 import { cn } from "@/lib/utils";
-import type { FilterType } from "@/types";
+import type { FilterType, TabType } from "@/types";
 
 interface FiltersPopoverProps {
   filter: FilterType[];
@@ -18,7 +18,7 @@ interface FiltersPopoverProps {
   selectedDirection: string;
   setSelectedDirection: (s: string) => void;
   resetFilters: () => void;
-  activeTab: "journal" | "analytics" | "missed";
+  activeTab: TabType;
 }
 
 const STATUS_OPTIONS: (FilterType | "All")[] = ["All", "Win", "Loss", "Open", "Breakeven"];

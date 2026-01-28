@@ -32,5 +32,5 @@ export const tradeSchema = z.object({
 
 export type Trade = z.infer<typeof tradeSchema>;
 
-export type TabType = 'journal' | 'analytics' | 'missed';
+export type TabType = 'journal' | 'analytics' | 'missed' | 'calendar';
 export type FilterType = 'All' | 'Win' | 'Loss' | 'Open' | 'Breakeven' | 'Missed';

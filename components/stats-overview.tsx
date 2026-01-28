@@ -2,13 +2,13 @@
 
 import * as React from "react";
 import { useTrades } from "@/context/trade-context";
-import { FilterType } from "@/types";
+import { FilterType, TabType } from "@/types";
 import { cn, formatNumber, filterTradesByTimeFilter } from "../lib/utils";
 
 interface StatsOverviewProps {
   onStatClick?: (filter: FilterType) => void;
   activeFilter?: FilterType;
-  activeTab?: 'journal' | 'analytics' | 'missed';
+  activeTab?: TabType;
   /** Compact variant for single unified header bar: Performance R + Win Rate only, smaller spacing */
   variant?: 'default' | 'compact';
 }

@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { StatsOverview } from "@/components/stats-overview";
 import { FiltersPopover } from "@/components/filters-popover";
 import { useTradesUI } from "@/context/trade-context";
-import type { FilterType } from "@/types";
+import type { FilterType, TabType } from "@/types";
 
 const searchBarContent = (
   searchInputRef: React.RefObject<HTMLInputElement | null>,
@@ -72,7 +72,7 @@ interface JournalHeaderProps {
   setSelectedPair: (s: string) => void;
   selectedDirection: string;
   setSelectedDirection: (s: string) => void;
-  activeTab: "journal" | "analytics" | "missed";
+  activeTab: TabType;
   onStatClick?: (filter: FilterType) => void;
   activeFilter?: FilterType;
 }

@@ -61,12 +61,12 @@ export function DataManagement() {
         const importedData = JSON.parse(content);
 
         if (!Array.isArray(importedData)) {
-          toast.error("IMPORT FAILED", { description: "File must be a JSON array of trades." });
+          toast.error("Import failed", { description: "File must be a JSON array of trades." });
           return;
         }
         const isValid = importedData.every((item: unknown) => item && typeof item === "object" && "id" in item && "pair" in item && "status" in item);
         if (!isValid) {
-          toast.error("IMPORT FAILED", { description: "Invalid data format. Each trade needs id, pair, and status." });
+          toast.error("Import failed", { description: "Invalid data format. Each trade needs id, pair, and status." });
           return;
         }
 
@@ -80,10 +80,10 @@ export function DataManagement() {
         const msg = `Import ${importedData.length} trades (${range})? This will replace your current data.`;
         if (window.confirm(msg)) {
           importTrades(importedData);
-          toast.success("BACKUP RESTORED", { description: `Imported ${importedData.length} trades.` });
+          toast.success("Backup restored", { description: `Imported ${importedData.length} trades.` });
         }
       } catch {
-        toast.error("IMPORT ERROR", { description: "Could not read file. Use a valid JSON backup." });
+        toast.error("Import error", { description: "Could not read file. Use a valid JSON backup." });
       }
       if (fileInputRef.current) fileInputRef.current.value = "";
     };
