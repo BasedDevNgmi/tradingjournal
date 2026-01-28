@@ -107,8 +107,8 @@ export function UnifiedTradeTable({
         />
       </div>
 
-      {/* Mobile view: fill available height so list uses full screen */}
-      <div className="md:hidden flex-1 min-h-0 overflow-hidden">
+      {/* Mobile view: fill available height so list uses full screen; explicit scroll host for touch */}
+      <div className="md:hidden flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-touch">
         <Virtuoso
           style={{ height: '100%' }}
           data={flattenedRows}

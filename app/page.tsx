@@ -68,7 +68,7 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <div className="h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/30 transition-colors duration-300 overflow-hidden relative">
+    <div className="h-screen min-h-screen min-h-[100dvh] bg-background text-foreground flex flex-col font-sans selection:bg-primary/30 transition-colors duration-300 overflow-hidden relative">
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
@@ -95,8 +95,8 @@ export default function Home() {
           />
         </div>
 
-        {/* Main content area */}
-        <div className="flex-1 flex flex-col min-w-0 relative bg-background h-full overflow-hidden">
+        {/* Main content area: stable height on mobile so scroll container resolves */}
+        <div className="flex-1 flex flex-col min-w-0 relative bg-background h-full min-h-0 overflow-hidden md:min-h-0">
           
           {/* Single unified header: compact stats | search | date + filters */}
           <div className="shrink-0 z-[40] workbench-header bg-background border-b border-border/10 h-[72px] flex items-center">
@@ -126,7 +126,7 @@ export default function Home() {
           </div>
 
           {/* Content */}
-          <main id="main-content" role="region" aria-label="Main content" className="flex-1 relative overflow-hidden flex flex-col min-h-0">
+          <main id="main-content" role="region" aria-label="Main content" className="flex-1 relative overflow-hidden flex flex-col min-h-0 min-h-[calc(100dvh-72px)] md:min-h-0">
             <AnimatePresence mode="wait">
               <motion.div 
                 key={activeTab}
