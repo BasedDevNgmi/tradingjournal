@@ -49,6 +49,7 @@ export function TradeForm({ initialData, onSubmit, isSubmitting }: TradeFormProp
       direction: "Long",
       psychoTags: [],
       confluences: [],
+      notes: "",
       currency: "USD",
       isMissed: false,
       riskPercent: 1,

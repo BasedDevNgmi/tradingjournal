@@ -53,6 +53,16 @@ export function Step4Reflection({ form, toggleArrayItem }: Step4ReflectionProps)
           </div>
 
           <div className="space-y-3">
+            <label className="text-xs font-medium text-muted-foreground ml-1">Notes</label>
+            <textarea
+              {...register("notes")}
+              placeholder="Context or quote..."
+              rows={2}
+              className="w-full p-4 text-sm font-medium bg-muted/20 border border-border rounded-xl outline-none focus:border-primary-accent transition-colors resize-none placeholder:text-muted-foreground/50"
+            />
+          </div>
+
+          <div className="space-y-3">
             <label className="text-xs font-medium text-muted-foreground ml-1">Takeaway</label>
             <textarea
               {...register("lessonLearned")}
