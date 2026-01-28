@@ -1,88 +1,123 @@
 "use client";
 
-import { useTrades } from "@/context/trade-context";
+import { useTradesData } from "@/context/trade-context";
 import { Button } from "@/components/ui/button";
-import { Download, Upload, AlertTriangle } from "lucide-react";
+import { Download, Upload } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
+import { Trade } from "@/types";
+import { format } from "date-fns";
+
+function escapeCsvCell (val: unknown): string {
+  if (val == null) return "";
+  const s = String(val);
+  if (s.includes(",") || s.includes('"') || s.includes("\n")) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
 
 export function DataManagement() {
-  const { trades, importTrades } = useTrades();
+  const { trades, importTrades } = useTradesData();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = () => {
     const dataStr = JSON.stringify(trades, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `trading-journal-${new Date().toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+    const name = `trading-journal-${new Date().toISOString().split("T")[0]}.json`;
+    const link = document.createElement("a");
+    link.setAttribute("href", dataUri);
+    link.setAttribute("download", name);
+    link.click();
+  };
+
+  const handleExportCsv = () => {
+    const cols = ["date", "pair", "direction", "status", "entryPrice", "stopLoss", "takeProfit", "exitPrice", "rrPredicted", "rrRealized", "pnlAmount", "currency", "session", "notes", "lessonLearned", "confluences", "psychoTags", "followedPlan"];
+    const header = cols.join(",");
+    const rows = trades.map((t: Trade) =>
+      cols.map((c) => {
+        const v = (t as Record<string, unknown>)[c];
+        if (c === "confluences" || c === "psychoTags") return escapeCsvCell(Array.isArray(v) ? v.join("; ") : v);
+        return escapeCsvCell(v);
+      }).join(",")
+    );
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const name = `trading-journal-${new Date().toISOString().split("T")[0]}.csv`;
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const fileReader = new FileReader();
     const file = event.target.files?.[0];
-
     if (!file) return;
 
+    const fileReader = new FileReader();
     fileReader.onload = (e) => {
       try {
         const content = e.target?.result as string;
         const importedData = JSON.parse(content);
 
-        // Basic validation
-        if (Array.isArray(importedData)) {
-          const isValid = importedData.every(item => item.id && item.pair && item.status);
-          
-          if (isValid) {
-            if (window.confirm("This will overwrite your current trades. Are you sure you want to proceed?")) {
-              importTrades(importedData);
-              toast.success("BACKUP RESTORED", {
-                description: `Imported ${importedData.length} trades successfully.`
-              });
-            }
-          } else {
-            toast.error("IMPORT FAILED", {
-              description: "Invalid data format. Please check the backup file."
-            });
-          }
+        if (!Array.isArray(importedData)) {
+          toast.error("IMPORT FAILED", { description: "File must be a JSON array of trades." });
+          return;
         }
-      } catch (err) {
-        toast.error("IMPORT ERROR", {
-          description: "Could not read file. Make sure it's a valid JSON."
-        });
-      }
-    };
+        const isValid = importedData.every((item: unknown) => item && typeof item === "object" && "id" in item && "pair" in item && "status" in item);
+        if (!isValid) {
+          toast.error("IMPORT FAILED", { description: "Invalid data format. Each trade needs id, pair, and status." });
+          return;
+        }
 
+        const dates = importedData.map((t: { date?: string }) => t.date).filter(Boolean) as string[];
+        const range =
+          dates.length === 0
+            ? "unknown dates"
+            : dates.length === 1
+              ? format(new Date(dates[0]), "d MMM yyyy")
+              : `${format(new Date(Math.min(...dates.map((d) => new Date(d).getTime()))), "d MMM yyyy")} – ${format(new Date(Math.max(...dates.map((d) => new Date(d).getTime()))), "d MMM yyyy")}`;
+        const msg = `Import ${importedData.length} trades (${range})? This will replace your current data.`;
+        if (window.confirm(msg)) {
+          importTrades(importedData);
+          toast.success("BACKUP RESTORED", { description: `Imported ${importedData.length} trades.` });
+        }
+      } catch {
+        toast.error("IMPORT ERROR", { description: "Could not read file. Use a valid JSON backup." });
+      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    };
     fileReader.readAsText(file);
-    // Reset input
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
-    <div className="space-y-6 text-black">
-      <div className="flex flex-col md:flex-row gap-6">
-        <div className="flex-1 brutalist-card space-y-4">
-          <h3 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
-            <Download size={20} /> Export Journal
-          </h3>
-          <p className="text-sm font-bold text-zinc-500">
-            Save a backup of your entire trading journal. All screenshots and notes are included in the JSON file.
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4">
+        <div className="p-5 rounded-2xl border border-border bg-muted/30 space-y-4">
+          <div className="flex items-center gap-2">
+            <Download size={14} className="text-muted-foreground" />
+            <h3 className="text-sm font-semibold text-foreground">Export Journal</h3>
+          </div>
+          <p className="text-sm font-medium text-muted-foreground/60 leading-relaxed">
+            Download your entire history as JSON or CSV.
           </p>
-          <Button onClick={handleExport} variant="outline" className="w-full">
-            Download Backup
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleExport} variant="outline" className="flex-1 h-10 text-sm font-semibold rounded-xl border-2 hover:bg-card transition-all">
+              JSON
+            </Button>
+            <Button onClick={handleExportCsv} variant="outline" className="flex-1 h-10 text-sm font-semibold rounded-xl border-2 hover:bg-card transition-all">
+              CSV
+            </Button>
+          </div>
         </div>
 
-        <div className="flex-1 brutalist-card space-y-4 bg-zinc-50">
-          <h3 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
-            <Upload size={20} /> Restore Backup
-          </h3>
-          <p className="text-sm font-bold text-zinc-500">
-            Import a previously exported journal. <span className="text-red-600 italic font-black">WARNING:</span> This will replace all current data.
+        <div className="p-5 rounded-2xl border border-border bg-muted/30 space-y-4">
+          <div className="flex items-center gap-2">
+            <Upload size={14} className="text-muted-foreground" />
+            <h3 className="text-sm font-semibold text-foreground">Restore Backup</h3>
+          </div>
+          <p className="text-sm font-medium text-muted-foreground/60 leading-relaxed">
+            Upload a JSON backup. You’ll see trade count and date range before confirming.
           </p>
           <input 
             type="file" 
@@ -93,9 +128,10 @@ export function DataManagement() {
           />
           <Button 
             onClick={() => fileInputRef.current?.click()} 
-            className="w-full bg-black text-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(239,68,68,1)]"
+            variant="outline"
+            className="w-full h-10 text-sm font-semibold rounded-xl border-2 hover:bg-card transition-all"
           >
-            Restore Backup
+            Upload JSON
           </Button>
         </div>
       </div>

@@ -1,52 +1,114 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import * as React from "react";
 import { useTrades } from "@/context/trade-context";
-import { TradeCard } from "./trade-card";
-import { TradeTable } from "./trade-table";
-import { FilterBar, FilterType } from "./filter-bar";
+import { DateRange } from "react-day-picker";
+import { motion } from "framer-motion";
+import { UnifiedTradeTable } from "@/components/unified-trade-table/index";
 import { Ghost } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { groupTradesByDate, filterTradesByTimeFilter } from "../lib/utils";
+import { getQualityLevelString } from "@/lib/trade-utils";
 
-export function TradeList() {
-  const { trades } = useTrades();
-  const [filter, setFilter] = useState<FilterType>('All');
-  const [sortBy, setSortBy] = useState<string>('newest');
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSetup, setSelectedSetup] = useState("all");
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
-  const [mounted, setMounted] = useState(false);
+export type FilterType = 'All' | 'Win' | 'Loss' | 'Open' | 'Breakeven' | 'Missed';
 
-  // Avoid hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+interface TradeListProps {
+  filter: FilterType[];
+  setFilter: (filter: FilterType[]) => void;
+  dateRange: DateRange | undefined;
+  setDateRange: (range: DateRange | undefined) => void;
+  sortBy: string;
+  setSortBy: (sort: string) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  selectedSetup: string;
+  setSelectedSetup: (setup: string) => void;
+  selectedPair: string;
+  setSelectedPair: (pair: string) => void;
+  selectedDirection: string;
+  setSelectedDirection: (direction: string) => void;
+  resetFilters: () => void;
+  mounted: boolean;
+  isMissedView?: boolean;
+}
 
-  const uniqueSetups = useMemo(() => {
-    const setups = new Set(trades.map(t => t.setupType));
-    return Array.from(setups).sort();
-  }, [trades]);
+export function TradeList({
+  filter,
+  setFilter,
+  dateRange,
+  setDateRange,
+  sortBy,
+  setSortBy,
+  searchQuery,
+  setSearchQuery,
+  selectedSetup,
+  setSelectedSetup,
+  selectedPair,
+  setSelectedPair,
+  selectedDirection,
+  setSelectedDirection,
+  resetFilters,
+  mounted,
+  isMissedView = false
+}: TradeListProps) {
+  const { trades, timeFilter } = useTrades();
 
-  const filteredAndSortedTrades = useMemo(() => {
-    let result = [...trades];
+  const filteredAndSortedTrades = React.useMemo(() => {
+    let result = filterTradesByTimeFilter(trades, timeFilter);
 
-    // Status Filtering
-    if (filter !== 'All') {
-      result = result.filter(trade => trade.status === filter);
+    // Separate Missed from Journal
+    if (isMissedView) {
+      result = result.filter(trade => trade.status === 'Missed');
+    } else {
+      result = result.filter(trade => trade.status !== 'Missed');
+      // Status Filtering (Multi-select)
+      if (filter.length > 0 && !filter.includes('All')) {
+        result = result.filter(trade => filter.includes(trade.status as FilterType));
+      }
     }
 
-    // Setup Filtering
+    // Date Range Filtering
+    if (dateRange?.from) {
+      const from = new Date(dateRange.from);
+      from.setHours(0, 0, 0, 0);
+      result = result.filter(trade => new Date(trade.date) >= from);
+    }
+    if (dateRange?.to) {
+      const to = new Date(dateRange.to);
+      to.setHours(23, 59, 59, 999);
+      result = result.filter(trade => new Date(trade.date) <= to);
+    }
+
+    // Quality Level Filtering
     if (selectedSetup !== 'all') {
-      result = result.filter(trade => trade.setupType === selectedSetup);
+      result = result.filter(trade => getQualityLevelString(trade.confluences) === selectedSetup);
     }
 
-    // Text Search
+    // Pair Filtering
+    if (selectedPair !== 'all') {
+      result = result.filter(trade => {
+        const tradePair = (trade.pair || "").trim().toLowerCase();
+        const filterPair = selectedPair.trim().toLowerCase();
+        return tradePair === filterPair;
+      });
+    }
+
+    // Direction Filtering
+    if (selectedDirection !== 'all') {
+      result = result.filter(trade => trade.direction.toLowerCase() === selectedDirection.toLowerCase());
+    }
+
+    // Text Search — pair, notes, lessonLearned, tags, psychoTags; "BTC" matches "BTC/USDT"
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      result = result.filter(trade => 
-        trade.pair.toLowerCase().includes(query) || 
-        (trade.notes && trade.notes.toLowerCase().includes(query))
-      );
+      result = result.filter(trade => {
+        if (trade.pair.toLowerCase().includes(query)) return true;
+        if (trade.notes?.toLowerCase().includes(query)) return true;
+        if (trade.lessonLearned?.toLowerCase().includes(query)) return true;
+        if (trade.tags?.some(t => t.toLowerCase().includes(query))) return true;
+        if (trade.psychoTags?.some(t => t.toLowerCase().includes(query))) return true;
+        return false;
+      });
     }
 
     // Sorting
@@ -61,15 +123,19 @@ export function TradeList() {
     }
 
     return result;
-  }, [trades, filter, sortBy, searchQuery, selectedSetup]);
+  }, [trades, filter, sortBy, searchQuery, selectedSetup, timeFilter, isMissedView, dateRange, selectedPair, selectedDirection]);
+
+  const groupedTrades = React.useMemo(() => {
+    return groupTradesByDate(filteredAndSortedTrades);
+  }, [filteredAndSortedTrades]);
 
   if (!mounted) {
     return (
       <div className="space-y-8 animate-pulse">
-        <div className="h-12 bg-zinc-50 border-4 border-black" />
+        <div className="h-12 bg-muted border-2 border-border rounded-xl" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-48 border-4 border-black bg-zinc-50" />
+            <div key={i} className="h-48 border-2 border-border bg-muted rounded-xl" />
           ))}
         </div>
       </div>
@@ -77,55 +143,47 @@ export function TradeList() {
   }
 
   return (
-    <div className="space-y-8 pb-32 md:pb-8">
-      <FilterBar 
-        activeFilter={filter} 
-        onFilterChange={setFilter}
-        activeSort={sortBy}
-        onSortChange={setSortBy}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        selectedSetup={selectedSetup}
-        onSetupChange={setSelectedSetup}
-        uniqueSetups={uniqueSetups}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-      />
-
+    <div className="flex-1 flex flex-col min-h-0">
       {filteredAndSortedTrades.length > 0 ? (
-        <>
-          {/* Card View (Always visible on mobile, conditional on desktop) */}
-          <div className={cn(
-            "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
-            viewMode === 'table' ? "md:hidden" : "block"
-          )}>
-            {filteredAndSortedTrades.map((trade) => (
-              <TradeCard key={trade.id} trade={trade} />
-            ))}
-          </div>
-
-          {/* Table View (Hidden on mobile, conditional on desktop) */}
-          <div className={cn(
-            "hidden md:block",
-            viewMode === 'grid' && "md:hidden"
-          )}>
-            <TradeTable trades={filteredAndSortedTrades} />
-          </div>
-        </>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="flex-1 flex flex-col min-h-0"
+        >
+          <UnifiedTradeTable
+            groupedTrades={groupedTrades}
+            onSortChange={setSortBy}
+            activeSort={sortBy}
+            isMissedView={isMissedView}
+          />
+        </motion.div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 border-4 border-dashed border-black bg-zinc-50">
-          <Ghost size={48} className="mb-4 text-black" />
-          <h3 className="text-xl font-black uppercase tracking-tighter text-black">No trades found</h3>
-          <p className="text-sm font-bold uppercase text-zinc-500 mt-2 text-center px-4">
-            No trades found within these filters. Go take a setup!
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="flex flex-col items-center justify-center py-32 workbench-panel relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent pointer-events-none" />
+          <Ghost size={48} className="mb-6 text-muted-foreground/20 animate-pulse" />
+          <h3 className="terminal-text text-lg text-foreground">
+            {isMissedView ? "The edge is sharp" : "Silence on the floor"}
+          </h3>
+          <p className="text-sm font-medium text-muted-foreground mt-2 text-center px-8 max-w-[320px] leading-relaxed">
+            {isMissedView 
+              ? "Zero missed setups detected. Your discipline is your greatest asset." 
+              : "No trades found in this period. Wait for your setup, don't force the market."}
           </p>
-          <button 
-            onClick={() => setFilter('All')}
-            className="mt-6 text-xs font-black uppercase underline decoration-2 underline-offset-4 text-black"
-          >
-            Clear all filters
-          </button>
-        </div>
+          {!isMissedView && (
+            <Button
+              onClick={resetFilters}
+              className="mt-8"
+            >
+              Reset all filters
+            </Button>
+          )}
+        </motion.div>
       )}
     </div>
   );

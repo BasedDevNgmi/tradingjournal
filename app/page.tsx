@@ -1,81 +1,202 @@
 "use client";
 
-import { useState } from "react";
+import * as React from "react";
+import dynamic from "next/dynamic";
 import { TradeList } from "@/components/trade-list";
-import { StatsOverview } from "@/components/stats-overview";
-import { EquityChart } from "@/components/equity-chart";
-import { CalendarView } from "@/components/calendar-view";
-import { DataManagement } from "@/components/data-management";
-import { TabSwitcher, TabType } from "@/components/tab-switcher";
 import { Plus } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+
+import { AnalyticsSkeleton } from "@/components/analytics-skeleton";
+const AnalyticsView = dynamic(
+  () => import("@/components/analytics-view").then((m) => ({ default: m.AnalyticsView })),
+  { ssr: false, loading: () => <AnalyticsSkeleton /> }
+);
+import { AddTradeModal } from "@/components/add-trade-modal";
+import { cn } from "@/lib/utils";
+import { Sidebar } from "@/components/layout/sidebar";
+import { useJournalNavigation } from "@/hooks/use-journal-navigation";
+import { useJournalFilters } from "@/hooks/use-journal-filters";
+import { JournalHeader } from "@/components/layout/journal-header";
+import { MobileSidebar } from "@/components/layout/mobile-sidebar";
+import { SettingsSidebar } from "@/components/layout/settings-sidebar";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { GlobalErrorBoundary } from "@/components/ui/error-boundary";
+import { OPEN_ADD_TRADE_EVENT, TOGGLE_SIDEBAR_EVENT } from "@/components/keyboard-shortcuts";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<TabType>('journal');
+  const { 
+    activeTab, setActiveTab,
+    isSettingsOpen, setIsSettingsOpen,
+    isAddModalOpen, setIsAddModalOpen,
+    isMobileMenuOpen, setIsMobileMenuOpen,
+    isSidebarCollapsed, setIsSidebarCollapsed,
+    isMobileSearchOpen, setIsMobileSearchOpen,
+    mounted,
+    searchInputRef,
+    focusSearch,
+    toggleSidebar
+  } = useJournalNavigation();
+
+  const {
+    filter, setFilter,
+    dateRange, setDateRange,
+    sortBy, setSortBy,
+    searchQuery, setSearchQuery,
+    selectedSetup, setSelectedSetup,
+    selectedPair, setSelectedPair,
+    selectedDirection, setSelectedDirection,
+    handleStatClick,
+    resetFilters
+  } = useJournalFilters(setActiveTab);
+
+  // Listen for global "N" shortcut to open add-trade modal (from layout keyboard-shortcuts)
+  React.useEffect(() => {
+    const onOpenAddTrade = () => setIsAddModalOpen(true);
+    window.addEventListener(OPEN_ADD_TRADE_EVENT, onOpenAddTrade);
+    return () => window.removeEventListener(OPEN_ADD_TRADE_EVENT, onOpenAddTrade);
+  }, [setIsAddModalOpen]);
+
+  // Listen for Mod+B to toggle sidebar (from layout keyboard-shortcuts)
+  React.useEffect(() => {
+    const onToggleSidebar = () => toggleSidebar();
+    window.addEventListener(TOGGLE_SIDEBAR_EVENT, onToggleSidebar);
+    return () => window.removeEventListener(TOGGLE_SIDEBAR_EVENT, onToggleSidebar);
+  }, [toggleSidebar]);
+
+  const reduceMotion = useReducedMotion();
+  const transition = reduceMotion ? { duration: 0 } : { duration: 0.2 };
+
+  if (!mounted) return null;
 
   return (
-    <div className="p-4 md:p-8 space-y-6">
-      <header className="border-b-4 border-black pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-black">
-            Trading Journal
-          </h1>
-          <p className="text-sm font-bold uppercase tracking-widest text-zinc-500 mt-2">
-            Suen System / Superflat Edition
-          </p>
-        </div>
-        <Link href="/add-trade" className="fixed bottom-6 right-4 z-50 sm:static">
-          <Button className="w-16 h-16 sm:w-auto sm:h-12 rounded-full sm:rounded-none flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 bg-yellow-300 text-black border-4 border-black px-0 sm:px-8">
-            <Plus size={32} strokeWidth={4} className="sm:mr-2 sm:w-6 sm:h-6" />
-            <span className="font-black hidden sm:inline text-lg">Add Trade</span>
-          </Button>
-        </Link>
-      </header>
-
-      {/* Stats Section - Always visible above tabs for quick reference */}
-      <StatsOverview />
-
-      {/* Tab Switcher */}
-      <TabSwitcher activeTab={activeTab} onTabChange={setActiveTab} />
-
-      {/* Conditional Content Based on Active Tab */}
-      <div className="pt-4">
-        {activeTab === 'journal' ? (
-          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <TradeList />
-          </div>
-        ) : (
-          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <section className="space-y-4">
-              <h2 className="text-2xl font-black uppercase tracking-tight italic border-l-8 border-black pl-4">Performance Curve</h2>
-              <EquityChart />
-            </section>
-            
-            <section className="space-y-4">
-              <h2 className="text-2xl font-black uppercase tracking-tight italic border-l-8 border-black pl-4">Consistency Calendar</h2>
-              <CalendarView />
-            </section>
-          </div>
-        )}
+    <div className="h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/30 transition-colors duration-300 overflow-hidden relative">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+      <div className="flex-1 flex overflow-hidden relative z-10">
         
-        {/* Data Management Section at the bottom */}
-        <div className="pt-12 mt-12 border-t-4 border-black">
-          <DataManagement />
+        {/* Sidebar: click-only collapse/expand; width from persisted state */}
+        <div className={cn(
+          "fixed inset-y-0 left-0 z-[100] lg:relative lg:block shrink-0 border-r border-border/10 bg-muted/5 backdrop-blur-md transition-[width] duration-300 ease-out",
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          isSidebarCollapsed ? "lg:w-20" : "lg:w-64"
+        )}>
+          <Sidebar 
+            activeTab={activeTab} 
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            onTabChange={(tab) => {
+              setActiveTab(tab);
+              setIsMobileMenuOpen(false);
+            }} 
+            onSettingsClick={() => {
+              setIsSettingsOpen(true);
+              setIsMobileMenuOpen(false);
+            }} 
+          />
+        </div>
+
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col min-w-0 relative bg-background h-full overflow-hidden">
+          
+          {/* Single unified header: compact stats | search | date + filters */}
+          <div className="shrink-0 z-[40] workbench-header bg-background border-b border-border/10 h-[72px] flex items-center">
+            <JournalHeader 
+              isMobileSearchOpen={isMobileSearchOpen}
+              setIsMobileSearchOpen={setIsMobileSearchOpen}
+              setIsMobileMenuOpen={setIsMobileMenuOpen}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              searchInputRef={searchInputRef}
+              focusSearch={focusSearch}
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+              resetFilters={resetFilters}
+              filter={filter}
+              setFilter={setFilter}
+              selectedSetup={selectedSetup}
+              setSelectedSetup={setSelectedSetup}
+              selectedPair={selectedPair}
+              setSelectedPair={setSelectedPair}
+              selectedDirection={selectedDirection}
+              setSelectedDirection={setSelectedDirection}
+              activeTab={activeTab}
+              onStatClick={handleStatClick}
+              activeFilter={filter[0]}
+            />
+          </div>
+
+          {/* Content */}
+          <main id="main-content" role="region" aria-label="Main content" className="flex-1 relative overflow-hidden flex flex-col min-h-0">
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={activeTab}
+                initial={{ opacity: 0, scale: 0.99 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.99 }}
+                transition={transition}
+                className="flex-1 flex flex-col min-h-0 overflow-hidden"
+              >
+                <div className="flex-1 flex flex-col min-h-0 max-w-[1800px] mx-auto w-full">
+                  {activeTab === 'journal' || activeTab === 'missed' ? (
+                    <div className="flex-1 flex flex-col min-h-0 px-6 overflow-hidden">
+                      <TradeList 
+                        filter={activeTab === 'missed' ? ['Missed'] : filter}
+                        setFilter={setFilter}
+                        dateRange={dateRange}
+                        setDateRange={setDateRange}
+                        sortBy={sortBy}
+                        setSortBy={setSortBy}
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                        selectedSetup={selectedSetup}
+                        setSelectedSetup={setSelectedSetup}
+                      selectedPair={selectedPair}
+                      setSelectedPair={setSelectedPair}
+                      selectedDirection={selectedDirection}
+                      setSelectedDirection={setSelectedDirection}
+                      resetFilters={resetFilters}
+                      mounted={mounted}
+                      isMissedView={activeTab === 'missed'}
+                    />
+                    </div>
+                  ) : (
+                    <div className="flex-1 overflow-y-auto scrollbar-thin px-6 py-8">
+                      <GlobalErrorBoundary>
+                        <AnalyticsView />
+                      </GlobalErrorBoundary>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </main>
         </div>
       </div>
-      
-      <footer className="pt-12 pb-8 flex flex-col sm:flex-row justify-between items-center gap-4 border-t-4 border-black mt-12">
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-          © 2026 Trading Journal
-        </p>
-        <div className="flex gap-4">
-          <div className="w-4 h-4 bg-black"></div>
-          <div className="w-4 h-4 bg-green-400"></div>
-          <div className="w-4 h-4 bg-red-400"></div>
-          <div className="w-4 h-4 bg-yellow-300"></div>
-        </div>
-      </footer>
+
+      <MobileSidebar 
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onSettingsClick={() => setIsSettingsOpen(true)}
+      />
+
+      <SettingsSidebar 
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
+
+      <AddTradeModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} />
+
+      <motion.button 
+        whileHover={reduceMotion ? undefined : { scale: 1.02 }}
+        whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+        onClick={() => setIsAddModalOpen(true)}
+        title="New trade (⌘N)"
+        className="fixed z-50 w-14 h-14 rounded-full bg-primary-accent text-white shadow-md hover:shadow-lg ring-4 ring-primary-accent/20 flex items-center justify-center transition-shadow bottom-[max(2.5rem,env(safe-area-inset-bottom))] right-[max(2.5rem,env(safe-area-inset-right))]"
+      >
+        <Plus size={24} strokeWidth={2.5} className="text-white" />
+      </motion.button>
     </div>
   );
 }

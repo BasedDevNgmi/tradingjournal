@@ -1,38 +1,146 @@
 @import "tailwindcss";
 
+/* Superflat neutral scale (5 steps). All surface colors derive from this. */
 :root {
-  --background: #ffffff;
-  --foreground: #000000;
-  --border: #000000;
+  --neutral-1: #fcfcfc;
+  --neutral-2: #f4f4f5;
+  --neutral-3: #e4e4e7;
+  --neutral-4: #a1a1aa;
+  --neutral-5: #111111;
+
+  --background: var(--neutral-1);
+  --foreground: var(--neutral-5);
+  --border: var(--neutral-3);
+  --primary: var(--neutral-5);
+  --primary-accent: #2563eb;
+  --accent: var(--neutral-2);
+  --radius: 0.75rem;
+  --radius-card: 1rem;
+  --radius-modal: 1rem;
+  --card: #ffffff;
+  --card-foreground: var(--neutral-5);
+  --muted: var(--neutral-2);
+  --muted-foreground: var(--neutral-4);
+  --success: #10b981;
+  --danger: #f43f5e;
+}
+
+.dark {
+  --neutral-1: #09090b;
+  --neutral-2: #18181b;
+  --neutral-3: #27272a;
+  --neutral-4: #a1a1aa;
+  --neutral-5: #fafafa;
+
+  --background: var(--neutral-1);
+  --foreground: var(--neutral-5);
+  --border: var(--neutral-3);
+  --primary: var(--neutral-5);
+  --primary-accent: #60a5fa;
+  --accent: var(--neutral-2);
+  --card: var(--neutral-1);
+  --card-foreground: var(--neutral-5);
+  --muted: var(--neutral-2);
+  --muted-foreground: var(--neutral-4);
+  --success: #34d399;
+  --danger: #fb7185;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-border: var(--border);
-  --font-inter: var(--font-inter);
+  --color-primary: var(--primary);
+  --color-primary-accent: var(--primary-accent);
+  --color-accent: var(--accent);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-card: var(--radius-card);
+  --radius-modal: var(--radius-modal);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-sans), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
-/* Brutalist UI Utilities */
-@layer components {
-  .brutalist-card {
-    @apply border-4 border-black bg-white p-4;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
-  
-  .brutalist-button {
-    @apply border-4 border-black bg-white px-4 py-2 font-bold transition-all active:translate-x-1 active:translate-y-1;
+}
+
+@layer components {
+  /* Panel: border + light fill for lists, headers, main workbench surface. No shadow. */
+  .panel {
+    @apply bg-muted/5 border border-border rounded-lg;
   }
 
-  .brutalist-input {
-    @apply border-4 border-black bg-white p-2 outline-none focus:bg-yellow-50;
+  /* Card: shadow + fill for modals and focus blocks only. */
+  .glass-card {
+    @apply bg-card border border-border shadow-sm rounded-xl;
+  }
+
+  .soft-button {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium transition-all active:scale-95 disabled:opacity-50;
+  }
+
+  /* Workbench: panel-style surfaces (superflat). */
+  .workbench-panel {
+    @apply bg-muted/5 border border-border rounded-lg;
+  }
+
+  .workbench-header {
+    @apply h-[72px] border-b border-border/20 flex items-center px-6 gap-6;
+  }
+
+  .workbench-sidebar {
+    @apply w-64 border-r border-border/20 flex flex-col;
+  }
+
+  /* Skip link: off-screen until focused for keyboard/screen-reader users */
+  .skip-link {
+    @apply absolute left-0 top-0 z-[200] -translate-y-full rounded-b-md bg-primary-accent px-6 py-3 text-sm font-medium text-white shadow-lg outline-none transition-transform focus:translate-y-0;
+  }
+
+  .terminal-text {
+    @apply font-black uppercase tracking-widest text-[10px];
+  }
+
+  /* Type hierarchy: use weight/size, not color, for hierarchy. */
+  .text-data {
+    @apply text-sm font-semibold tracking-tight;
+  }
+
+  .text-label {
+    @apply text-xs text-muted-foreground font-medium;
+  }
+
+  /* Mono only for R, pair, codes, numeric data. */
+  .mono-data {
+    @apply font-mono tracking-tighter tabular-nums;
+  }
+
+  /* Section headings: analytics, modals, etc. */
+  .text-section {
+    @apply text-xs font-semibold text-muted-foreground uppercase tracking-wider;
   }
 
   .no-scrollbar::-webkit-scrollbar {
@@ -41,5 +149,75 @@ body {
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Custom scrollbar for scrollable areas that show scrollbar (command list, filters, etc.) */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+
+  /* Dialog overlay/content open/close animations */
+  @keyframes dialog-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes dialog-fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  @keyframes dialog-zoom-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes dialog-zoom-out {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.96); }
+  }
+  .dialog-overlay[data-state=open] {
+    animation: dialog-fade-in 0.2s ease-out both;
+  }
+  .dialog-overlay[data-state=closed] {
+    animation: dialog-fade-out 0.15s ease-in both;
+  }
+  .dialog-content[data-state=open] {
+    animation: dialog-zoom-in 0.2s ease-out both;
+  }
+  .dialog-content[data-state=closed] {
+    animation: dialog-zoom-out 0.15s ease-in both;
+  }
+
+  /* Fallback for animate-in / fade-in used by tooltips, wizards, etc. */
+  .animate-in.fade-in {
+    animation: dialog-fade-in 0.2s ease-out both;
+  }
+  .animate-in.slide-in-from-top-4 {
+    animation: dialog-fade-in 0.25s ease-out both;
+  }
+  .animate-in.duration-200 { animation-duration: 0.2s; }
+  .animate-in.duration-300 { animation-duration: 0.3s; }
+  .animate-in.duration-500 { animation-duration: 0.5s; }
+
+  /* Date Picker Styles (v9 uses .rdp-root for CSS variables) */
+  .rdp-root,
+  .rdp {
+    --rdp-cell-size: 36px;
+    --rdp-accent-color: var(--primary);
+    --rdp-background-color: var(--accent);
+    margin: 0;
   }
 }

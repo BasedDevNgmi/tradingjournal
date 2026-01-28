@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import * as React from "react";
 import { useDropzone } from "react-dropzone";
 import { Image as ImageIcon, X, UploadCloud } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -11,14 +11,38 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ value, onChange }: ImageUploadProps) {
-  const [isPasting, setIsPasting] = useState(false);
+  const [isOptimizing, setIsOptimizing] = React.useState(false);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  const optimizeImage = async (base64Image: string) => {
+    setIsOptimizing(true);
+    try {
+      const response = await fetch("/api/optimize-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: base64Image }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        onChange(data.optimizedImage);
+      } else {
+        // Fallback to original if optimization fails
+        onChange(base64Image);
+      }
+    } catch (error) {
+      console.error("Optimization failed:", error);
+      onChange(base64Image);
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
+
+  const onDrop = React.useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        onChange(e.target?.result as string);
+        optimizeImage(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -32,15 +56,18 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
     maxFiles: 1
   });
 
-  const handlePaste = useCallback((e: React.ClipboardEvent) => {
-    const items = e.clipboardData.items;
+  const handlePaste = React.useCallback((e: React.ClipboardEvent | ClipboardEvent) => {
+    const clipboardData = (e as React.ClipboardEvent).clipboardData || (e as ClipboardEvent).clipboardData;
+    if (!clipboardData) return;
+
+    const items = clipboardData.items;
     for (let i = 0; i < items.length; i++) {
       if (items[i].type.indexOf("image") !== -1) {
         const blob = items[i].getAsFile();
         if (blob) {
           const reader = new FileReader();
-          reader.onload = (e) => {
-            onChange(e.target?.result as string);
+          reader.onload = (ev) => {
+            optimizeImage(reader.result as string);
           };
           reader.readAsDataURL(blob);
         }
@@ -53,36 +80,37 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
       {!value ? (
         <div
           {...getRootProps()}
+          tabIndex={0}
           onPaste={handlePaste}
           className={cn(
-            "border-4 border-dashed border-black bg-zinc-50 p-8 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-zinc-100",
-            isDragActive && "bg-yellow-50 border-solid",
-            isPasting && "ring-4 ring-black"
+            "border border-dashed border-border bg-muted/30 p-6 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-muted/50 hover:border-border outline-none focus:ring-2 focus:ring-primary-accent/20 focus:border-primary-accent",
+            isDragActive && "bg-muted/50 border-border border-solid",
+            isOptimizing && "opacity-50 cursor-wait"
           )}
         >
           <input {...getInputProps()} />
-          <UploadCloud size={48} className="text-zinc-400 mb-4" />
-          <p className="text-sm font-black uppercase tracking-tighter text-center text-black">
-            {isDragActive ? "Drop the chart here" : "Drag & Drop or click to upload chart"}
+          <UploadCloud size={28} className={cn("text-muted-foreground mb-3 transition-colors", isDragActive && "text-foreground", isOptimizing && "animate-bounce")} />
+          <p className="text-xs font-medium text-center text-muted-foreground leading-tight">
+            {isOptimizing ? "Optimizing Chart..." : isDragActive ? "Drop the chart here" : "Click or Drag & Drop"}
           </p>
-          <p className="text-[10px] font-bold uppercase text-zinc-400 mt-2">
-            Tip: You can also paste (Cmd+V) directly here
+          <p className="text-[9px] font-medium uppercase text-muted-foreground/70 mt-1.5 opacity-60">
+            {isOptimizing ? "Converting to WebP" : "Paste (Cmd+V)"}
           </p>
         </div>
       ) : (
         <div className="relative group">
-          <div className="border-4 border-black bg-white overflow-hidden">
+          <div className="border border-border bg-card overflow-hidden rounded-lg shadow-sm">
             <img 
               src={value} 
               alt="Uploaded chart" 
-              className="w-full h-auto block max-h-[400px] object-contain" 
+              className="w-full h-auto block max-h-[300px] object-contain" 
             />
           </div>
           <button
             onClick={() => onChange("")}
-            className="absolute -top-4 -right-4 bg-red-400 text-black border-4 border-black p-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+            className="absolute -top-2 -right-2 bg-card text-muted-foreground border border-border p-1.5 rounded-full shadow-md hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/20 transition-all"
           >
-            <X size={20} strokeWidth={4} />
+            <X size={14} />
           </button>
         </div>
       )}
