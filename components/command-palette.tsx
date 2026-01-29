@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Command } from "cmdk";
-import { Search, BookOpen, BarChart3, Calendar, Plus, Clock, Terminal, Zap, Settings } from "lucide-react";
+import { Search, BookOpen, BarChart3, Plus, Clock, Terminal, Zap, Settings } from "lucide-react";
 import { useJournalNavigation } from "@/hooks/use-journal-navigation";
 import { useJournalFilters } from "@/hooks/use-journal-filters";
 import { useTradesData } from "@/context/trade-context";
@@ -74,7 +74,6 @@ export function CommandPalette() {
                 <Command.Group heading="Navigation" className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
                   <CommandItem onSelect={() => runCommand(() => setActiveTab('journal'))} icon={BookOpen} label="Journal" />
                   <CommandItem onSelect={() => runCommand(() => setActiveTab('missed'))} icon={Clock} label="Missed setups" />
-                  <CommandItem onSelect={() => runCommand(() => setActiveTab('calendar'))} icon={Calendar} label="Calendar" />
                   <CommandItem onSelect={() => runCommand(() => setActiveTab('analytics'))} icon={BarChart3} label="Analytics" />
                   <CommandItem onSelect={() => runCommand(() => setIsSettingsOpen(true))} icon={Settings} label="System settings" />
                 </Command.Group>

@@ -3,6 +3,45 @@ import { AOC_CONFLUENCES, PSYCHO_TAGS, TRADING_PAIRS } from "@/lib/constants";
 import { calculateRR } from "@/lib/trade-utils";
 
 const SESSIONS = ["Asia", "London", "New York"] as const;
+export const NEWS_EVENTS = ["CPI", "FOMC Statement", "NFP", "PPI", "Retail Sales", "GDP", "Unemployment Rate", "ISM Manufacturing PMI"];
+
+const NOTES_BY_EVENT: Record<string, Array<{ notes: string; lessons: string }>> = {
+  CPI: [
+    { notes: "Waited for initial CPI print spike then entered on pullback.", lessons: "CPI volatility is predictable in the first 15 min; avoid the first candle." },
+    { notes: "Entered before release; stopped out on the number.", lessons: "Never hold through CPI—flat or wait for reaction." },
+    { notes: "Took the break of the first range after CPI settled.", lessons: "Post-CPI range often sets the session direction." },
+  ],
+  "FOMC Statement": [
+    { notes: "FOMC day—high volatility; reduced size and held to target.", lessons: "Size down on FOMC; plan the level before the event." },
+    { notes: "Entered on the first pullback after the initial FOMC move.", lessons: "FOMC first move often gets faded; wait for structure." },
+    { notes: "Skipped the chop, took the clean break 30 min after.", lessons: "Post-FOMC direction often clears after the first 30 min." },
+  ],
+  NFP: [
+    { notes: "NFP beat—dollar spiked; went long EUR on the retrace.", lessons: "NFP surprise gets faded often; wait for the first reversal." },
+    { notes: "Stayed flat through NFP, traded the London open after.", lessons: "Best NFP trade is sometimes no trade until the dust settles." },
+    { notes: "Took the breakout of the NFP range after 20 min.", lessons: "NFP range expansion often continues in one direction." },
+  ],
+  PPI: [
+    { notes: "PPI in line—small move; took the range break.", lessons: "PPI can be a non-event; treat like a normal session if in line." },
+    { notes: "PPI miss; entered with the trend after the first candle.", lessons: "PPI surprises can set the tone for the day." },
+  ],
+  "Retail Sales": [
+    { notes: "Retail sales strong—dollar bid; shorted EUR on the bounce.", lessons: "Retail Sales often reinforces or reverses the prior trend." },
+    { notes: "Waited for the first 5 min spike to settle then entered.", lessons: "Retail Sales first move is often overdone." },
+  ],
+  GDP: [
+    { notes: "GDP revision—entered on the second leg after the initial move.", lessons: "GDP revisions can cause two-legged moves; wait for the second." },
+    { notes: "GDP day; reduced size and used wider stop.", lessons: "GDP days need wider stops; plan for whipsaw." },
+  ],
+  "Unemployment Rate": [
+    { notes: "Unemployment down—risk-on; went long indices on the dip.", lessons: "Jobs number drives risk sentiment; align with the surprise." },
+    { notes: "Stayed flat through the number, traded the trend after.", lessons: "Unemployment can whipsaw; sometimes better to wait." },
+  ],
+  "ISM Manufacturing PMI": [
+    { notes: "ISM beat—dollar rallied; entered on the first pullback.", lessons: "ISM is a leading indicator; first reaction often holds." },
+    { notes: "ISM miss; waited for the reversal and went with the trend.", lessons: "ISM surprises can reverse quickly; wait for confirmation." },
+  ],
+};
 
 function generateMockTrades(): Trade[] {
   const trades: Trade[] = [];
@@ -64,18 +103,22 @@ function generateMockTrades(): Trade[] {
         psychoTags.push(status === "Win" ? "Disciplined" : "Disciplined");
       }
 
+      const newsEvent = NEWS_EVENTS[Math.floor(Math.random() * NEWS_EVENTS.length)];
+      const isNewsDay = true;
+      const eventNotes = NOTES_BY_EVENT[newsEvent];
+      const noteEntry =
+        eventNotes && eventNotes.length > 0
+          ? eventNotes[Math.floor(Math.random() * eventNotes.length)]
+          : null;
+
       const notes =
-        status === "Win"
-          ? "Followed plan, held to target."
-          : status === "Loss"
-            ? "Stopped out; level didn’t hold."
-            : undefined;
+        status !== "Open" && status !== "Missed" && noteEntry
+          ? noteEntry.notes
+          : undefined;
       const lessonLearned =
-        status === "Win"
-          ? "Sticking to the plan pays off."
-          : status === "Loss"
-            ? "Revenge traded; need to wait for setup."
-            : undefined;
+        status !== "Open" && status !== "Missed" && noteEntry
+          ? noteEntry.lessons
+          : undefined;
 
       let rrRealized: number | undefined;
       let exitPrice: number | undefined;
@@ -130,6 +173,8 @@ function generateMockTrades(): Trade[] {
         psychoTags: psychoTags.length ? psychoTags : undefined,
         riskPercent,
         session,
+        isNewsDay,
+        newsEvent,
         followedPlan,
         feeling,
       });

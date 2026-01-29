@@ -14,6 +14,7 @@ export const modalContentClass = {
 
 interface ModalShellProps {
   title?: string;
+  subtitle?: string;
   onClose?: () => void;
   children: React.ReactNode;
   bodyClassName?: string;
@@ -23,6 +24,7 @@ interface ModalShellProps {
 
 export function ModalShell({
   title,
+  subtitle,
   onClose,
   children,
   bodyClassName,
@@ -38,17 +40,23 @@ export function ModalShell({
 
   return (
     <div className="flex flex-1 flex-col min-h-0 overflow-hidden w-full">
-      {(title != null || onClose != null) && (
+      {(title != null || subtitle != null || onClose != null) && (
         <header className="shrink-0 flex items-center justify-between gap-4 px-6 py-4 border-b border-border bg-muted/30">
-          {title != null && (
-            <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-          )}
+          <div className="min-w-0">
+            {title != null && (
+              <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+            )}
+            {subtitle != null && (
+              <p className="text-xs font-medium text-muted-foreground mt-0.5">{subtitle}</p>
+            )}
+          </div>
           {onClose != null && (
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors ml-auto shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               title="Close"
+              aria-label="Close"
             >
               <X size={20} />
             </button>

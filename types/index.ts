@@ -28,9 +28,11 @@ export const tradeSchema = z.object({
   feeling: z.string().optional(),
   riskPercent: z.number().optional(),
   session: z.enum(['Asia', 'London', 'New York']).optional(),
+  isNewsDay: z.boolean().optional(),
+  newsEvent: z.string().optional(),
 });
 
 export type Trade = z.infer<typeof tradeSchema>;
 
-export type TabType = 'journal' | 'analytics' | 'missed' | 'calendar';
+export type TabType = 'journal' | 'analytics' | 'missed';
 export type FilterType = 'All' | 'Win' | 'Loss' | 'Open' | 'Breakeven' | 'Missed';

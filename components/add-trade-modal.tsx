@@ -5,11 +5,14 @@ import { useTradesData } from "@/context/trade-context";
 import { Trade } from "@/types";
 import { toast } from "sonner";
 import { TradeForm } from "@/components/trade-form/index";
+import type { TradeFormValues } from "@/components/trade-form/schema";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ModalShell, modalContentClass } from "@/components/ui/modal-shell";
+import { calculateRealizedRR } from "@/lib/trade-utils";
 
 interface AddTradeModalProps {
   defaultType?: "live" | "missed";
+  defaultMode?: "live" | "missed" | "past";
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -17,6 +20,7 @@ interface AddTradeModalProps {
 
 export function AddTradeModal({
   defaultType = "live",
+  defaultMode,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
 }: AddTradeModalProps) {
@@ -26,38 +30,71 @@ export function AddTradeModal({
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = setControlledOpen !== undefined ? setControlledOpen : setInternalOpen;
 
-  const handleAddTrade = (data: any, calculatedRR: number) => {
+  const resolveMode = defaultMode ?? (defaultType === "missed" ? "missed" : "live");
+
+  const handleAddTrade = (data: TradeFormValues, calculatedRR: number) => {
+    const isPast = data.status === "Win" || data.status === "Loss" || data.status === "Breakeven";
+    const status = data.isMissed ? "Missed" : (data.status ?? "Open");
+    const date = data.tradeDate?.trim()
+      ? new Date(data.tradeDate + "T12:00:00Z").toISOString()
+      : new Date().toISOString();
+    const rrRealized =
+      data.rrRealized ??
+      (isPast && data.exitPrice != null
+        ? calculateRealizedRR({
+            entryPrice: data.entryPrice,
+            stopLoss: data.stopLoss,
+            exitPrice: data.exitPrice,
+            direction: data.direction,
+          })
+        : undefined);
+
     const newTrade: Trade = {
       id: crypto.randomUUID(),
       pair: data.pair.trim().toUpperCase(),
       direction: data.direction,
-      status: data.isMissed ? "Missed" : "Open",
-      date: new Date().toISOString(),
+      status,
+      date,
       entryPrice: data.entryPrice,
       stopLoss: data.stopLoss,
       takeProfit: data.takeProfit,
+      exitPrice: data.exitPrice,
       rrPredicted: calculatedRR,
-      confluences: data.confluences,
+      rrRealized,
+      confluences: data.confluences ?? [],
       notes: data.notes,
       lessonLearned: data.lessonLearned,
       beforeScreenshotUrl: data.beforeScreenshotUrl,
       afterScreenshotUrl: data.afterScreenshotUrl,
-      psychoTags: data.psychoTags,
+      psychoTags: data.psychoTags ?? [],
       tags: [],
       currency: data.currency,
       pnlAmount: data.pnlAmount,
       riskPercent: data.riskPercent,
       session: data.session,
+      isNewsDay: data.isNewsDay ?? false,
+      newsEvent: data.isNewsDay ? (data.newsEvent?.trim() || undefined) : undefined,
     };
 
     addTrade(newTrade);
-    toast.success(data.isMissed ? "Missed Setup Logged" : "Trade Logged!", {
-      description: data.isMissed
-        ? "Keep refining your execution."
-        : `Predicted: ${newTrade.rrPredicted.toFixed(2)}R`,
-    });
+    if (data.isMissed) {
+      toast.success("Missed Setup Logged", { description: "Keep refining your execution." });
+    } else if (isPast) {
+      toast.success("Past Trade Logged", {
+        description: rrRealized != null ? `Realized: ${rrRealized >= 0 ? "+" : ""}${rrRealized.toFixed(2)}R` : undefined,
+      });
+    } else {
+      toast.success("Trade Logged!", { description: `Predicted: ${newTrade.rrPredicted.toFixed(2)}R` });
+    }
     setOpen(false);
   };
+
+  const initialData =
+    resolveMode === "missed"
+      ? ({ status: "Missed" } as Partial<Trade>)
+      : resolveMode === "past"
+        ? ({ status: "Win", date: new Date().toISOString() } as Partial<Trade>)
+        : undefined;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -70,14 +107,13 @@ export function AddTradeModal({
         </div>
         <ModalShell
           title="Add new trade"
+          subtitle="Live entry, missed setup, or log a past trade"
           onClose={() => setOpen(false)}
           bodyClassName="p-0"
         >
           <TradeForm
             onSubmit={handleAddTrade}
-            initialData={
-              defaultType === "missed" ? ({ status: "Missed" } as any) : undefined
-            }
+            initialData={initialData as Partial<Trade> | undefined}
           />
         </ModalShell>
       </DialogContent>

@@ -50,6 +50,9 @@ function TradeRowInner({
             </div>
             <span className="text-xs font-medium text-muted-foreground/70 truncate">
               {trade.session || "Session"}
+              {trade.isNewsDay === true
+                ? ` · ${trade.newsEvent || "News"}`
+                : " · No news"}
             </span>
           </div>
         </div>

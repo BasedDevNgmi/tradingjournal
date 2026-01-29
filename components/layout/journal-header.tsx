@@ -72,6 +72,10 @@ interface JournalHeaderProps {
   setSelectedPair: (s: string) => void;
   selectedDirection: string;
   setSelectedDirection: (s: string) => void;
+  selectedNewsDay: string;
+  setSelectedNewsDay: (s: string) => void;
+  selectedNewsEvent: string;
+  setSelectedNewsEvent: (s: string) => void;
   activeTab: TabType;
   onStatClick?: (filter: FilterType) => void;
   activeFilter?: FilterType;
@@ -96,6 +100,10 @@ export function JournalHeader({
   setSelectedPair,
   selectedDirection,
   setSelectedDirection,
+  selectedNewsDay,
+  setSelectedNewsDay,
+  selectedNewsEvent,
+  setSelectedNewsEvent,
   activeTab,
   onStatClick,
   activeFilter,
@@ -258,6 +266,10 @@ export function JournalHeader({
             setSelectedPair={setSelectedPair}
             selectedDirection={selectedDirection}
             setSelectedDirection={setSelectedDirection}
+            selectedNewsDay={selectedNewsDay}
+            setSelectedNewsDay={setSelectedNewsDay}
+            selectedNewsEvent={selectedNewsEvent}
+            setSelectedNewsEvent={setSelectedNewsEvent}
             resetFilters={resetFilters}
             activeTab={activeTab}
           />

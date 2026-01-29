@@ -5,6 +5,7 @@ import { cn } from "../../lib/utils";
 import { Calendar, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { PairInput } from "@/components/ui/pair-input";
+import { NewsEventInput } from "@/components/ui/news-event-input";
 
 interface IdentitySectionProps {
   trade: Trade;
@@ -64,6 +65,41 @@ export function IdentitySection({
           <option value="London">London</option>
           <option value="New York">New York</option>
         </select>
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-medium text-muted-foreground">News day</span>
+          <div className="flex gap-2">
+            {([true, false] as const).map((isNews) => (
+              <button
+                key={String(isNews)}
+                type="button"
+                onClick={() =>
+                  onUpdate({
+                    isNewsDay: isNews,
+                    ...(isNews ? {} : { newsEvent: undefined }),
+                  })
+                }
+                className={cn(
+                  "px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors",
+                  trade.isNewsDay === isNews
+                    ? "bg-primary-accent border-primary-accent text-white"
+                    : "bg-muted/20 border-border/50 text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {isNews ? "Yes" : "No"}
+              </button>
+            ))}
+          </div>
+          {trade.isNewsDay && (
+            <div className="min-w-[160px]">
+              <span className="text-xs font-medium text-muted-foreground block mb-1.5">News event</span>
+              <NewsEventInput
+                value={trade.newsEvent ?? ""}
+                onChange={(v) => onUpdate({ newsEvent: v?.trim() || undefined })}
+                placeholder="e.g. CPI, FOMC"
+              />
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -80,6 +116,22 @@ export function IdentitySection({
           <span className="flex items-center gap-1.5 shrink-0">
             <Clock size={12} className="shrink-0" />
             <span>{trade.session}</span>
+          </span>
+        </>
+      )}
+      {trade.isNewsDay != null && (
+        <>
+          <span className="text-muted-foreground/40 shrink-0">·</span>
+          <span className="flex items-center gap-1.5 shrink-0">
+            <span>News day: {trade.isNewsDay ? "Yes" : "No"}</span>
+          </span>
+        </>
+      )}
+      {trade.isNewsDay && trade.newsEvent && (
+        <>
+          <span className="text-muted-foreground/40 shrink-0">·</span>
+          <span className="flex items-center gap-1.5 shrink-0">
+            <span>Event: {trade.newsEvent}</span>
           </span>
         </>
       )}

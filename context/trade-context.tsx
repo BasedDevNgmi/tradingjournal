@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Trade } from '@/types';
-import { MOCK_TRADES } from '@/lib/mock-data';
+import { MOCK_TRADES, NEWS_EVENTS } from '@/lib/mock-data';
 
 interface TradesDataContextType {
   trades: Trade[];
@@ -57,13 +57,27 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  // Load trades from localStorage on mount
+  // Load trades from localStorage on mount; migrate trades missing isNewsDay/newsEvent
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
         const savedTrades = localStorage.getItem('trading-journal-trades');
         if (savedTrades) {
-          setTrades(JSON.parse(savedTrades));
+          const parsed: Trade[] = JSON.parse(savedTrades);
+          const migrated = parsed.map((t) => {
+            if (t.isNewsDay === undefined) {
+              const isNewsDay = Math.random() > 0.5;
+              return {
+                ...t,
+                isNewsDay,
+                newsEvent: isNewsDay
+                  ? NEWS_EVENTS[Math.floor(Math.random() * NEWS_EVENTS.length)]
+                  : undefined,
+              };
+            }
+            return t;
+          });
+          setTrades(migrated);
         } else {
           setTrades(MOCK_TRADES);
         }

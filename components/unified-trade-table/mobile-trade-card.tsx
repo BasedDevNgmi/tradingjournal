@@ -37,7 +37,15 @@ function MobileTradeCardInner({ trade, handleRowClick }: MobileTradeCardProps) {
             <div className="min-w-0">
               <p className="font-semibold text-sm truncate leading-tight">{trade.pair}</p>
               <p className="text-[11px] font-medium text-muted-foreground truncate leading-tight">
-                {trade.session ? `${trade.session} · ${entryTime}` : entryTime}
+                {[
+                  trade.session,
+                  trade.isNewsDay === true
+                    ? (trade.newsEvent || "News")
+                    : "No news",
+                  entryTime,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
               </p>
             </div>
           </div>

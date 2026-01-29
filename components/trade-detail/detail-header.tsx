@@ -69,6 +69,11 @@ export function DetailHeader({
         {trade.session && (
           <span className="text-xs text-muted-foreground/60 shrink-0">{trade.session}</span>
         )}
+        {trade.isNewsDay && (
+          <span className="text-xs text-muted-foreground/60 shrink-0 px-1.5 py-0.5 rounded bg-muted/40 border border-border/30">
+            {trade.newsEvent ? trade.newsEvent : "News day"}
+          </span>
+        )}
       </div>
 
       <div className="flex shrink-0 items-center gap-2">

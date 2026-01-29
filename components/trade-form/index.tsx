@@ -41,12 +41,21 @@ export function TradeForm({ initialData, onSubmit, isSubmitting }: TradeFormProp
       psychoTags: initialData.psychoTags || [],
       pnlAmount: initialData.pnlAmount,
       currency: initialData.currency || "USD",
-      isMissed: initialData.status === 'Missed',
+      isMissed: initialData.status === "Missed",
       riskPercent: initialData.riskPercent || 1,
       session: initialData.session,
+      isNewsDay: initialData.isNewsDay ?? false,
+      newsEvent: initialData.newsEvent ?? "",
+      tradeDate: initialData.date ? initialData.date.slice(0, 10) : undefined,
+      status: initialData.status,
+      exitPrice: initialData.exitPrice,
+      rrRealized: initialData.rrRealized,
     } : {
       pair: "BTC/USDT",
       direction: "Long",
+      entryPrice: 100,
+      stopLoss: 98,
+      takeProfit: 105,
       psychoTags: [],
       confluences: [],
       notes: "",
@@ -59,6 +68,12 @@ export function TradeForm({ initialData, onSubmit, isSubmitting }: TradeFormProp
         if (hour >= 8 && hour < 14) return "London";
         return "New York";
       })() as any,
+      isNewsDay: false,
+      newsEvent: "",
+      tradeDate: undefined,
+      status: "Open",
+      exitPrice: undefined,
+      rrRealized: undefined,
     },
   });
 
@@ -95,13 +110,33 @@ export function TradeForm({ initialData, onSubmit, isSubmitting }: TradeFormProp
   };
 
   const nextStep = async () => {
-    let fieldsToValidate: any[] = [];
-    if (currentStep === 1) fieldsToValidate = ["pair", "session"];
-    if (currentStep === 3) fieldsToValidate = ["entryPrice", "stopLoss", "takeProfit", "riskPercent"];
-    
+    let fieldsToValidate: (keyof TradeFormValues)[] = [];
+    if (currentStep === 1) {
+      fieldsToValidate = ["pair", "session"];
+      const isPast = formData.status === "Win" || formData.status === "Loss" || formData.status === "Breakeven";
+      if (isPast) fieldsToValidate.push("tradeDate");
+    }
+    if (currentStep === 3) {
+      // Run full schema so refinements (SL/TP vs direction) are validated
+      const isStepValid = await trigger();
+      if (isStepValid) setCurrentStep((prev) => Math.min(prev + 1, 4));
+      return;
+    }
     const isStepValid = await trigger(fieldsToValidate as any);
-    if (isStepValid) setCurrentStep(prev => Math.min(prev + 1, 4));
+    if (isStepValid) setCurrentStep((prev) => Math.min(prev + 1, 4));
   };
+
+  const handleDeployClick = () => {
+    handleSubmit((data) => onSubmit(data, calculatedRR))();
+  };
+
+  const summaryLine = React.useMemo(() => {
+    if (currentStep !== 4) return undefined;
+    const r = formData.status === "Win" || formData.status === "Loss" || formData.status === "Breakeven"
+      ? (formData.rrRealized != null ? `${formData.rrRealized >= 0 ? "+" : ""}${formData.rrRealized}` : "—")
+      : String(calculatedRR);
+    return `${formData.pair} ${formData.direction} · ${r}R · ${formData.status ?? "Open"}`;
+  }, [currentStep, formData.pair, formData.direction, formData.status, formData.rrRealized, calculatedRR]);
 
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
@@ -141,9 +176,7 @@ export function TradeForm({ initialData, onSubmit, isSubmitting }: TradeFormProp
     <div className="relative flex flex-col h-full bg-card">
       <FormProgress currentStep={currentStep} totalSteps={4} />
 
-      <form onSubmit={handleSubmit((data) => {
-        onSubmit(data, calculatedRR);
-      })} className="flex flex-col h-full overflow-hidden">
+      <form onSubmit={(e) => e.preventDefault()} className="flex flex-col h-full overflow-hidden">
         <div className="flex-1 overflow-y-auto px-8 py-6 scrollbar-thin">
           <AnimatePresence mode="wait">
             <motion.div
@@ -168,8 +201,10 @@ export function TradeForm({ initialData, onSubmit, isSubmitting }: TradeFormProp
           totalSteps={4}
           onPrev={prevStep}
           onNext={nextStep}
+          onDeployClick={handleDeployClick}
           isSubmitting={isSubmitting}
           isEdit={!!initialData}
+          summaryLine={summaryLine}
         />
       </form>
     </div>

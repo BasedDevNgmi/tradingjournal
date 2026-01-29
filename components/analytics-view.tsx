@@ -2,256 +2,66 @@
 
 import * as React from "react";
 import { useTrades } from "@/context/trade-context";
+import { useAnalytics } from "@/hooks/use-analytics";
 import { EquityChart } from "./equity-chart";
-import { cn, formatNumber, filterTradesByTimeFilter } from "../lib/utils";
-import { getQualityLevel, isLeakSetup } from "@/lib/trade-utils";
+import { CalendarView } from "./calendar-view";
+import { cn, formatNumber } from "../lib/utils";
 import {
-  Activity,
-  Target,
-  TrendingUp,
-  TrendingDown,
-  Clock,
   Brain,
   ShieldCheck,
-  Zap,
+  ChevronRight,
+  CalendarDays,
+  TrendingUp,
+  TrendingDown,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { GlobalErrorBoundary } from "./ui/error-boundary";
-
-function getKillzone(dateStr: string) {
-  const date = new Date(dateStr);
-  const utcHour = date.getUTCHours();
-  const nyHour = (utcHour - 5 + 24) % 24;
-  if (nyHour >= 2 && nyHour < 5) return "London Open";
-  if (nyHour >= 7 && nyHour < 10) return "NY Open";
-  if (nyHour >= 20 && nyHour < 24) return "Asia Open";
-  return "Outside";
-}
+import { NewsEventDetailModal } from "./analytics/news-event-detail-modal";
+import { CollapsibleAnalyticsSection } from "./analytics/collapsible-analytics-section";
+import { MetricPill } from "./analytics/metric-pill";
 
 export function AnalyticsView() {
   const { trades, timeFilter } = useTrades();
-
-  const filteredTrades = React.useMemo(
-    () => filterTradesByTimeFilter(trades, timeFilter),
-    [trades, timeFilter]
-  );
-
-  const closedTrades = React.useMemo(
-    () =>
-      filteredTrades.filter(
-        (t) => t.status !== "Open" && t.status !== "Missed"
-      ),
-    [filteredTrades]
-  );
-
-  const hudMetrics = React.useMemo(() => {
-    const wins = closedTrades.filter((t) => t.status === "Win");
-    const losses = closedTrades.filter((t) => t.status === "Loss");
-    const totalWinsR = wins.reduce((acc, t) => acc + (t.rrRealized || 0), 0);
-    const totalLossesR = Math.abs(
-      losses.reduce((acc, t) => acc + (t.rrRealized || 0), 0)
-    );
-    const profitFactor =
-      totalLossesR === 0 ? (totalWinsR > 0 ? totalWinsR : 0) : totalWinsR / totalLossesR;
-    const totalR = closedTrades.reduce(
-      (acc, t) => acc + (t.rrRealized || 0),
-      0
-    );
-    const expectancy =
-      closedTrades.length > 0 ? totalR / closedTrades.length : 0;
-    const winRate =
-      closedTrades.length > 0
-        ? (wins.length / closedTrades.length) * 100
-        : 0;
-    const sorted = [...closedTrades].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-    let peak = 0,
-      drawdown = 0,
-      cum = 0;
-    for (const t of sorted) {
-      cum += t.rrRealized || 0;
-      peak = Math.max(peak, cum);
-      drawdown = Math.max(drawdown, peak - cum);
-    }
-    return {
-      expectancy,
-      profitFactor,
-      winRate,
-      totalR,
-      totalTrades: closedTrades.length,
-      drawdown,
-    };
-  }, [closedTrades]);
-
-  const killzoneStats = React.useMemo(() => {
-    const stats: Record<
-      string,
-      { totalR: number; wins: number; count: number }
-    > = {
-      "London Open": { totalR: 0, wins: 0, count: 0 },
-      "NY Open": { totalR: 0, wins: 0, count: 0 },
-      "Asia Open": { totalR: 0, wins: 0, count: 0 },
-      Outside: { totalR: 0, wins: 0, count: 0 },
-    };
-    closedTrades.forEach((t) => {
-      const kz = getKillzone(t.date);
-      stats[kz].count++;
-      stats[kz].totalR += t.rrRealized || 0;
-      if (t.status === "Win") stats[kz].wins++;
-    });
-    return ["London Open", "NY Open", "Asia Open", "Outside"].map(
-      (name) => ({
-        name,
-        ...stats[name],
-        winRate:
-          stats[name].count > 0
-            ? (stats[name].wins / stats[name].count) * 100
-            : 0,
-      })
-    );
-  }, [closedTrades]);
-
-  const planAdherenceStats = React.useMemo(() => {
-    const followed = closedTrades.filter((t) => t.followedPlan === true);
-    const notFollowed = closedTrades.filter((t) => t.followedPlan === false);
-    const wr = (ts: typeof closedTrades) =>
-      ts.length > 0
-        ? (ts.filter((t) => t.status === "Win").length / ts.length) * 100
-        : 0;
-    const totalR = (ts: typeof closedTrades) =>
-      ts.reduce((a, t) => a + (t.rrRealized || 0), 0);
-    return {
-      followed: {
-        count: followed.length,
-        totalR: totalR(followed),
-        winRate: wr(followed),
-      },
-      notFollowed: {
-        count: notFollowed.length,
-        totalR: totalR(notFollowed),
-        winRate: wr(notFollowed),
-      },
-    };
-  }, [closedTrades]);
-
-  const psychoTagStats = React.useMemo(() => {
-    const byTag: Record<
-      string,
-      { count: number; totalR: number; wins: number }
-    > = {};
-    closedTrades.forEach((t) => {
-      const tags = t.psychoTags?.length ? t.psychoTags : ["None"];
-      tags.forEach((tag) => {
-        if (!byTag[tag]) byTag[tag] = { count: 0, totalR: 0, wins: 0 };
-        byTag[tag].count++;
-        byTag[tag].totalR += t.rrRealized || 0;
-        if (t.status === "Win") byTag[tag].wins++;
-      });
-    });
-    return Object.entries(byTag)
-      .map(([name, s]) => ({
-        name,
-        count: s.count,
-        totalR: s.totalR,
-        winRate: s.count > 0 ? (s.wins / s.count) * 100 : 0,
-      }))
-      .sort((a, b) => b.totalR - a.totalR);
-  }, [closedTrades]);
-
-  const playbookStats = React.useMemo(() => {
-    const highQuality = closedTrades.filter(
-      (t) => getQualityLevel(t.confluences) === 3
-    );
-    const lowQuality = closedTrades.filter(
-      (t) => getQualityLevel(t.confluences) === 1
-    );
-    const leakTrades = closedTrades.filter((t) =>
-      isLeakSetup(t.confluences)
-    );
-    const wr = (ts: typeof closedTrades) =>
-      ts.length > 0
-        ? (ts.filter((t) => t.status === "Win").length / ts.length) * 100
-        : 0;
-    const leakR = leakTrades.reduce(
-      (acc, t) => acc + (t.rrRealized || 0),
-      0
-    );
-    return {
-      highQualityWR: wr(highQuality),
-      lowQualityWR: wr(lowQuality),
-      highCount: highQuality.length,
-      lowCount: lowQuality.length,
-      leakR,
-    };
-  }, [closedTrades]);
-
-  const executionStats = React.useMemo(() => {
-    const wins = closedTrades.filter(
-      (t) =>
-        t.status === "Win" &&
-        t.rrPredicted != null &&
-        t.rrRealized != null
-    );
-    const hitTarget = wins.filter(
-      (t) =>
-        (t.rrRealized ?? 0) >= (t.rrPredicted ?? 0) * 0.9
-    ).length;
-    const targetHitRate =
-      wins.length > 0 ? (hitTarget / wins.length) * 100 : 0;
-    const sumRealized = wins.reduce((a, t) => a + (t.rrRealized ?? 0), 0);
-    const sumPredicted = wins.reduce(
-      (a, t) => a + (t.rrPredicted ?? 0),
-      0
-    );
-    const avgCapture =
-      sumPredicted > 0 ? (sumRealized / sumPredicted) * 100 : 0;
-    return { targetHitRate, avgCapture, winCount: wins.length };
-  }, [closedTrades]);
-
-  const insightLine = React.useMemo(() => {
-    if (closedTrades.length < 3) return null;
-    const parts: string[] = [];
-    const bestKz = killzoneStats.find(
-      (r) => r.name !== "Outside" && r.count >= 2
-    );
-    if (bestKz) {
-      parts.push(
-        `Best session: ${bestKz.name} (${bestKz.totalR >= 0 ? "+" : ""}${formatNumber(bestKz.totalR)}R, ${formatNumber(bestKz.winRate, 0)}% WR)`
-      );
-    }
-    if (
-      planAdherenceStats.followed.count >= 3 &&
-      planAdherenceStats.notFollowed.count >= 1
-    ) {
-      const planInsight =
-        planAdherenceStats.followed.winRate >=
-        planAdherenceStats.notFollowed.winRate
-          ? "Following your plan improves WR"
-          : "Review plan adherence";
-      parts.push(planInsight);
-    }
-    return parts.length > 0 ? parts.join(" · ") : null;
-  }, [
-    closedTrades.length,
+  const analytics = useAnalytics(trades, timeFilter);
+  const {
+    filteredTrades,
+    closedTrades,
+    periodLabel,
+    hasNoClosedTrades,
+    hudMetrics,
     killzoneStats,
-    planAdherenceStats.followed,
-    planAdherenceStats.notFollowed,
-  ]);
+    dayOfWeekStats,
+    newsDayStats,
+    newsEventStats,
+    newsEventTradeVsAvoid,
+    planAdherenceStats,
+    psychoTagStats,
+    playbookStats,
+    executionStats,
+    insightLine,
+  } = analytics;
 
-  const periodLabel =
-    timeFilter === "1D"
-      ? "Today"
-      : timeFilter === "1W"
-        ? "Last 7 days"
-        : timeFilter === "1M"
-          ? "Last 30 days"
-          : "All time";
+  const [selectedEventName, setSelectedEventName] = React.useState<string | null>(null);
+  const [whenOpen, setWhenOpen] = React.useState(true);
+  const [newsOpen, setNewsOpen] = React.useState(false);
+  const [howOpen, setHowOpen] = React.useState(false);
 
-  const hasNoClosedTrades = closedTrades.length === 0;
+  const eventTrades = React.useMemo(() => {
+    if (!selectedEventName) return [];
+    return closedTrades.filter(
+      (t) =>
+        t.isNewsDay === true &&
+        ((t.newsEvent?.trim() || "") || "No event") === selectedEventName
+    );
+  }, [closedTrades, selectedEventName]);
+
+  const insightBullets = React.useMemo(() => {
+    if (!insightLine) return [];
+    return insightLine.split(" · ").filter(Boolean);
+  }, [insightLine]);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-10 pb-12">
+    <div className="max-w-6xl mx-auto space-y-8 pb-12">
+      {/* Period + count */}
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground/90">{periodLabel}</span>
@@ -272,289 +82,470 @@ export function AnalyticsView() {
 
       {!hasNoClosedTrades && (
         <>
-          {/* Core metrics */}
-          <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[
-              {
-                label: "Expectancy",
-                value: `${formatNumber(hudMetrics.expectancy)}R`,
-                sub: "Per trade",
-                icon: Target,
-                positive: hudMetrics.expectancy >= 0,
-              },
-              {
-                label: "Win rate",
-                value: `${formatNumber(hudMetrics.winRate, 0)}%`,
-                sub: `${hudMetrics.totalTrades} trades`,
-                icon: Activity,
-                positive: true,
-              },
-              {
-                label: "Profit factor",
-                value: formatNumber(hudMetrics.profitFactor),
-                sub: "Wins / losses",
-                icon: TrendingUp,
-                positive: hudMetrics.profitFactor >= 1,
-              },
-              {
-                label: "Total R",
-                value: `${hudMetrics.totalR >= 0 ? "+" : ""}${formatNumber(hudMetrics.totalR)}R`,
-                sub: "Period",
-                icon: Zap,
-                positive: hudMetrics.totalR >= 0,
-              },
-              {
-                label: "Drawdown",
-                value: `${formatNumber(hudMetrics.drawdown)}R`,
-                sub: "Max peak–trough",
-                icon: TrendingDown,
-                positive: hudMetrics.drawdown === 0,
-              },
-            ].map((m, i) => (
-              <motion.div
-                key={m.label}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.04 }}
-                className="rounded-2xl border border-border/30 bg-card/40 p-5 flex flex-col gap-4"
+          {/* Hero: one metric + pills */}
+          <section className="flex flex-col sm:flex-row sm:items-end gap-6">
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <span className="text-label text-muted-foreground uppercase tracking-wider">
+                Total R
+              </span>
+              <span
+                className={cn(
+                  "text-4xl font-bold tracking-tight tabular-nums",
+                  hudMetrics.totalR >= 0
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-rose-600 dark:text-rose-400"
+                )}
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-label uppercase tracking-wider">
-                    {m.label}
-                  </span>
-                  <m.icon
-                    size={16}
-                    className={cn(
-                      "text-muted-foreground/60",
-                      m.positive !== undefined &&
-                        (m.positive
-                          ? "text-emerald-500/70"
-                          : "text-rose-500/70")
-                    )}
-                  />
-                </div>
-                <div>
-                  <p
-                    className={cn(
-                      "text-2xl font-semibold tracking-tight tabular-nums",
-                      m.positive !== undefined
-                        ? m.positive
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-rose-600 dark:text-rose-400"
-                        : "text-foreground"
-                    )}
-                  >
-                    {m.value}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {m.sub}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+                {hudMetrics.totalR >= 0 ? "+" : ""}
+                {formatNumber(hudMetrics.totalR)}R
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2 sm:ml-auto">
+              <MetricPill
+                label="Win rate"
+                value={`${formatNumber(hudMetrics.winRate, 0)}%`}
+              />
+              <MetricPill
+                label="Profit factor"
+                value={formatNumber(hudMetrics.profitFactor)}
+                positive={hudMetrics.profitFactor >= 1}
+              />
+              <MetricPill
+                label="Drawdown"
+                value={`${formatNumber(hudMetrics.drawdown)}R`}
+                positive={hudMetrics.drawdown === 0}
+              />
+            </div>
           </section>
 
-          {insightLine && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-sm text-muted-foreground bg-muted/30 rounded-2xl px-5 py-3 border border-border/20"
-            >
-              {insightLine}
-            </motion.p>
-          )}
-
-          {/* Equity curve */}
-          <section>
-            <h2 className="text-section mb-4">
-              Equity curve
-            </h2>
-            <div className="rounded-2xl border border-border/30 bg-card/40 p-6 min-h-[380px] flex flex-col">
+          {/* Equity curve + calendar (same height on lg) */}
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:min-h-[420px]">
+            <div className="lg:col-span-2 h-full min-h-[360px] rounded-2xl bg-muted/5 border border-border/20 p-6 flex flex-col">
               <GlobalErrorBoundary>
                 <EquityChart trades={filteredTrades} />
               </GlobalErrorBoundary>
             </div>
-          </section>
-
-          {/* Session performance */}
-          <section>
-            <h2 className="text-section mb-4 flex items-center gap-2">
-              <Clock size={14} />
-              Session performance
-            </h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {killzoneStats.map((row) => (
-                <div
-                  key={row.name}
-                  className="rounded-2xl border border-border/30 bg-card/40 p-5 flex flex-col gap-1"
-                >
-                  <span className="text-label">
-                    {row.name}
-                  </span>
-                  <span
-                    className={cn(
-                      "text-xl font-semibold tabular-nums",
-                      row.totalR >= 0
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-rose-600 dark:text-rose-400"
-                    )}
-                  >
-                    {row.totalR >= 0 ? "+" : ""}
-                    {formatNumber(row.totalR)}R
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {row.count} trades · {formatNumber(row.winRate, 0)}% WR
-                  </span>
-                </div>
-              ))}
+            <div className="h-full min-h-[360px] rounded-2xl bg-muted/5 border border-border/20 p-6 flex flex-col">
+              <GlobalErrorBoundary>
+                <CalendarView trades={filteredTrades} />
+              </GlobalErrorBoundary>
             </div>
           </section>
 
-          {/* Plan adherence + Psychology */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="rounded-2xl border border-border/30 bg-card/40 p-6">
-              <h2 className="text-section mb-4 flex items-center gap-2">
-                <ShieldCheck size={14} />
-                Plan adherence
-              </h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl bg-muted/20 p-4">
-                  <span className="text-label">
-                    Followed plan
-                  </span>
-                  <p
-                    className={cn(
-                      "text-lg font-semibold mt-1 tabular-nums",
-                      planAdherenceStats.followed.totalR >= 0
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-rose-600 dark:text-rose-400"
-                    )}
+          {/* Insights */}
+          {insightBullets.length > 0 && (
+            <section className="rounded-2xl bg-muted/20 border border-border/20 px-5 py-4">
+              <ul className="space-y-2">
+                {insightBullets.map((bullet, i) => (
+                  <li
+                    key={i}
+                    className="text-sm text-muted-foreground leading-relaxed"
                   >
-                    {planAdherenceStats.followed.totalR >= 0 ? "+" : ""}
-                    {formatNumber(planAdherenceStats.followed.totalR)}R
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {planAdherenceStats.followed.count} trades ·{" "}
-                    {formatNumber(planAdherenceStats.followed.winRate, 0)}% WR
-                  </p>
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Explore: collapsible sections */}
+          <section className="space-y-3">
+            <CollapsibleAnalyticsSection
+              title="When you trade"
+              summary="Session · Mon–Fri"
+              open={whenOpen}
+              onToggle={() => setWhenOpen(!whenOpen)}
+            >
+              <div className="space-y-6 pt-2">
+                <div>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                    Session performance
+                  </h3>
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    {killzoneStats.map((row) => (
+                      <div
+                        key={row.name}
+                        className="rounded-xl border border-border/20 bg-muted/5 p-4 flex flex-col gap-1"
+                      >
+                        <span className="text-label text-muted-foreground">
+                          {row.name}
+                        </span>
+                        <span
+                          className={cn(
+                            "text-lg font-semibold tabular-nums",
+                            row.totalR >= 0
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-rose-600 dark:text-rose-400"
+                          )}
+                        >
+                          {row.totalR >= 0 ? "+" : ""}
+                          {formatNumber(row.totalR)}R
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {row.count} trades · {formatNumber(row.winRate, 0)}% WR
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="rounded-xl bg-muted/20 p-4">
-                  <span className="text-label">
-                    Didn&apos;t follow
-                  </span>
-                  <p
-                    className={cn(
-                      "text-lg font-semibold mt-1 tabular-nums",
-                      planAdherenceStats.notFollowed.totalR >= 0
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-rose-600 dark:text-rose-400"
-                    )}
-                  >
-                    {planAdherenceStats.notFollowed.totalR >= 0 ? "+" : ""}
-                    {formatNumber(planAdherenceStats.notFollowed.totalR)}R
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {planAdherenceStats.notFollowed.count} trades ·{" "}
-                    {formatNumber(planAdherenceStats.notFollowed.winRate, 0)}%
-                    WR
-                  </p>
+                <div>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-3">
+                    <CalendarDays size={12} />
+                    Performance by day
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    {dayOfWeekStats.map((row) => (
+                      <div
+                        key={row.name}
+                        className="rounded-xl border border-border/20 bg-muted/5 p-4 flex flex-col gap-1"
+                      >
+                        <span className="text-label text-muted-foreground">
+                          {row.name}
+                        </span>
+                        <span
+                          className={cn(
+                            "text-lg font-semibold tabular-nums",
+                            row.totalR >= 0
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-rose-600 dark:text-rose-400"
+                          )}
+                        >
+                          {row.totalR >= 0 ? "+" : ""}
+                          {formatNumber(row.totalR)}R
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {row.count} trades · {formatNumber(row.winRate, 0)}% WR
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            </CollapsibleAnalyticsSection>
 
-            <div className="rounded-2xl border border-border/30 bg-card/40 p-6">
-              <h2 className="text-section mb-4 flex items-center gap-2">
-                <Brain size={14} />
-                Psychology
-              </h2>
-              <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1">
-                {psychoTagStats.map((row) => (
-                  <div
-                    key={row.name}
-                    className="flex items-center justify-between gap-3 py-2 border-b border-border/10 last:border-0 text-sm"
-                  >
-                    <span
-                      className={cn(
-                        "font-medium",
-                        row.totalR < 0 && "text-rose-600 dark:text-rose-400"
-                      )}
-                    >
-                      {row.name}
-                    </span>
-                    <div className="flex items-center gap-3 shrink-0 text-xs">
-                      <span
-                        className={cn(
-                          "font-medium tabular-nums",
-                          row.totalR >= 0
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-rose-600 dark:text-rose-400"
-                        )}
+            <CollapsibleAnalyticsSection
+              title="News"
+              summary={`News vs non-news · ${newsEventStats.length} events`}
+              open={newsOpen}
+              onToggle={() => setNewsOpen(!newsOpen)}
+            >
+              <div className="space-y-6 pt-2">
+                <div>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                    News vs non-news days
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {newsDayStats.map((row) => (
+                      <div
+                        key={row.name}
+                        className="rounded-xl border border-border/20 bg-muted/5 p-4 flex flex-col gap-1"
                       >
-                        {row.totalR >= 0 ? "+" : ""}
-                        {formatNumber(row.totalR)}R
-                      </span>
-                      <span className="text-muted-foreground">
-                        {row.count} · {formatNumber(row.winRate, 0)}% WR
-                      </span>
+                        <span className="text-label text-muted-foreground">
+                          {row.name}
+                        </span>
+                        <span
+                          className={cn(
+                            "text-lg font-semibold tabular-nums",
+                            row.totalR >= 0
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-rose-600 dark:text-rose-400"
+                          )}
+                        >
+                          {row.totalR >= 0 ? "+" : ""}
+                          {formatNumber(row.totalR)}R
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {row.count} trades · {formatNumber(row.winRate, 0)}% WR
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {newsEventStats.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                      By event (trade / avoid)
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Which events to trade and which to avoid (min 2 trades per
+                      event). Click an event to view notes and lessons.
+                    </p>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {newsEventTradeVsAvoid.trade.length > 0 && (
+                        <div className="rounded-xl border border-border/20 bg-muted/5 p-4">
+                          <h4 className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mb-2 flex items-center gap-2">
+                            <TrendingUp size={14} />
+                            Trade these
+                          </h4>
+                          <ul className="space-y-0">
+                            {newsEventTradeVsAvoid.trade.map((row) => (
+                              <li
+                                key={row.name}
+                                className="border-b border-border/20 last:border-0"
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedEventName(row.name)}
+                                  className="w-full flex items-center justify-between gap-3 py-2.5 text-left rounded-lg hover:bg-muted/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                >
+                                  <span
+                                    className="font-medium truncate text-sm"
+                                    title={row.name}
+                                  >
+                                    {row.name}
+                                  </span>
+                                  <div className="flex items-center gap-2 shrink-0 text-xs">
+                                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                                      +{formatNumber(row.totalR)}R
+                                    </span>
+                                    <span className="text-muted-foreground">
+                                      {row.count} · {formatNumber(row.winRate, 0)}% WR
+                                    </span>
+                                    <ChevronRight
+                                      size={14}
+                                      className="text-muted-foreground shrink-0"
+                                    />
+                                  </div>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {newsEventTradeVsAvoid.avoid.length > 0 && (
+                        <div className="rounded-xl border border-border/20 bg-muted/5 p-4">
+                          <h4 className="text-sm font-semibold text-rose-600 dark:text-rose-400 mb-2 flex items-center gap-2">
+                            <TrendingDown size={14} />
+                            Avoid these
+                          </h4>
+                          <ul className="space-y-0">
+                            {newsEventTradeVsAvoid.avoid.map((row) => (
+                              <li
+                                key={row.name}
+                                className="border-b border-border/20 last:border-0"
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedEventName(row.name)}
+                                  className="w-full flex items-center justify-between gap-3 py-2.5 text-left rounded-lg hover:bg-muted/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                >
+                                  <span
+                                    className="font-medium truncate text-sm"
+                                    title={row.name}
+                                  >
+                                    {row.name}
+                                  </span>
+                                  <div className="flex items-center gap-2 shrink-0 text-xs">
+                                    <span className="font-semibold text-rose-600 dark:text-rose-400 tabular-nums">
+                                      {formatNumber(row.totalR)}R
+                                    </span>
+                                    <span className="text-muted-foreground">
+                                      {row.count} · {formatNumber(row.winRate, 0)}% WR
+                                    </span>
+                                    <ChevronRight
+                                      size={14}
+                                      className="text-muted-foreground shrink-0"
+                                    />
+                                  </div>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                    {newsEventTradeVsAvoid.needMore.length > 0 && (
+                      <div className="mt-4 rounded-xl border border-border/20 bg-muted/10 p-3">
+                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                          Need more data
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {newsEventTradeVsAvoid.needMore.map((row) => (
+                            <button
+                              key={row.name}
+                              type="button"
+                              onClick={() => setSelectedEventName(row.name)}
+                              className="text-xs font-medium px-2.5 py-1 rounded-lg border border-border/40 bg-muted/20 text-muted-foreground hover:bg-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                              title={`${row.count} trade(s) · ${formatNumber(row.totalR)}R`}
+                            >
+                              {row.name} ({row.count})
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </CollapsibleAnalyticsSection>
+
+            <CollapsibleAnalyticsSection
+              title="How you trade"
+              summary="Plan · Psychology · Playbook"
+              open={howOpen}
+              onToggle={() => setHowOpen(!howOpen)}
+            >
+              <div className="space-y-6 pt-2">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="rounded-xl border border-border/20 bg-muted/5 p-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-3">
+                      <ShieldCheck size={12} />
+                      Plan adherence
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-lg bg-muted/20 p-3">
+                        <span className="text-label text-muted-foreground">
+                          Followed plan
+                        </span>
+                        <p
+                          className={cn(
+                            "text-base font-semibold mt-1 tabular-nums",
+                            planAdherenceStats.followed.totalR >= 0
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-rose-600 dark:text-rose-400"
+                          )}
+                        >
+                          {planAdherenceStats.followed.totalR >= 0 ? "+" : ""}
+                          {formatNumber(planAdherenceStats.followed.totalR)}R
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {planAdherenceStats.followed.count} trades ·{" "}
+                          {formatNumber(planAdherenceStats.followed.winRate, 0)}% WR
+                        </p>
+                      </div>
+                      <div className="rounded-lg bg-muted/20 p-3">
+                        <span className="text-label text-muted-foreground">
+                          Didn&apos;t follow
+                        </span>
+                        <p
+                          className={cn(
+                            "text-base font-semibold mt-1 tabular-nums",
+                            planAdherenceStats.notFollowed.totalR >= 0
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-rose-600 dark:text-rose-400"
+                          )}
+                        >
+                          {planAdherenceStats.notFollowed.totalR >= 0 ? "+" : ""}
+                          {formatNumber(planAdherenceStats.notFollowed.totalR)}R
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {planAdherenceStats.notFollowed.count} trades ·{" "}
+                          {formatNumber(planAdherenceStats.notFollowed.winRate, 0)}% WR
+                        </p>
+                      </div>
                     </div>
                   </div>
-                ))}
+                  <div className="rounded-xl border border-border/20 bg-muted/5 p-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-3">
+                      <Brain size={12} />
+                      Psychology
+                    </h3>
+                    <div className="space-y-1 max-h-[160px] overflow-y-auto pr-1">
+                      {psychoTagStats.map((row) => (
+                        <div
+                          key={row.name}
+                          className="flex items-center justify-between gap-2 py-2 border-b border-border/10 last:border-0 text-sm"
+                        >
+                          <span
+                            className={cn(
+                              "font-medium",
+                              row.totalR < 0 &&
+                                "text-rose-600 dark:text-rose-400"
+                            )}
+                          >
+                            {row.name}
+                          </span>
+                          <div className="flex items-center gap-2 shrink-0 text-xs">
+                            <span
+                              className={cn(
+                                "font-medium tabular-nums",
+                                row.totalR >= 0
+                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  : "text-rose-600 dark:text-rose-400"
+                              )}
+                            >
+                              {row.totalR >= 0 ? "+" : ""}
+                              {formatNumber(row.totalR)}R
+                            </span>
+                            <span className="text-muted-foreground">
+                              {row.count} · {formatNumber(row.winRate, 0)}% WR
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {psychoTagStats.some((r) => r.totalR < 0) && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Avoid revenge / FOMO — they correlate with negative R.
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                    Playbook and execution
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="rounded-xl border border-border/20 bg-muted/5 p-4">
+                      <span className="text-label text-muted-foreground uppercase tracking-wider">
+                        A+ setup WR
+                      </span>
+                      <p className="text-xl font-semibold text-emerald-600 dark:text-emerald-400 mt-1 tabular-nums">
+                        {formatNumber(playbookStats.highQualityWR, 0)}%
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {playbookStats.highCount} trades (7+ confluences)
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-border/20 bg-muted/5 p-4">
+                      <span className="text-label text-muted-foreground uppercase tracking-wider">
+                        Low quality WR
+                      </span>
+                      <p className="text-xl font-semibold text-rose-600 dark:text-rose-400 mt-1 tabular-nums">
+                        {formatNumber(playbookStats.lowQualityWR, 0)}%
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {playbookStats.lowCount} trades (&lt;6 confluences)
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-border/20 bg-muted/5 p-4 flex flex-col justify-between">
+                      <span className="text-label text-muted-foreground uppercase tracking-wider">
+                        Leak (&lt;5 confluences)
+                      </span>
+                      <p
+                        className={cn(
+                          "text-xl font-semibold mt-1 tabular-nums",
+                          playbookStats.leakR < 0
+                            ? "text-rose-600 dark:text-rose-400"
+                            : "text-emerald-600 dark:text-emerald-400"
+                        )}
+                      >
+                        {playbookStats.leakR > 0 ? "+" : ""}
+                        {formatNumber(playbookStats.leakR)}R
+                      </p>
+                      {executionStats.winCount >= 1 && (
+                        <div className="mt-2 pt-2 border-t border-border/20 text-xs text-muted-foreground">
+                          Target hit {formatNumber(executionStats.targetHitRate, 0)}% ·
+                          Avg capture {formatNumber(executionStats.avgCapture, 0)}%
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
-              {psychoTagStats.some((r) => r.totalR < 0) && (
-                <p className="mt-3 text-xs text-muted-foreground">
-                  Avoid revenge / FOMO — they correlate with negative R.
-                </p>
-              )}
-            </div>
+            </CollapsibleAnalyticsSection>
           </section>
 
-          {/* Playbook + Leak + Execution */}
-          <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="rounded-2xl border border-border/30 bg-card/40 p-5">
-              <span className="text-label uppercase tracking-wider">
-                A+ setup WR
-              </span>
-              <p className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400 mt-1 tabular-nums">
-                {formatNumber(playbookStats.highQualityWR, 0)}%
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {playbookStats.highCount} trades (7+ confluences)
-              </p>
-            </div>
-            <div className="rounded-2xl border border-border/30 bg-card/40 p-5">
-              <span className="text-label uppercase tracking-wider">
-                Low quality WR
-              </span>
-              <p className="text-2xl font-semibold text-rose-600 dark:text-rose-400 mt-1 tabular-nums">
-                {formatNumber(playbookStats.lowQualityWR, 0)}%
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {playbookStats.lowCount} trades (&lt;6 confluences)
-              </p>
-            </div>
-            <div className="rounded-2xl border border-border/30 bg-card/40 p-5 flex flex-col justify-between">
-              <span className="text-label uppercase tracking-wider">
-                Leak (&lt;5 confluences)
-              </span>
-              <p
-                className={cn(
-                  "text-2xl font-semibold mt-1 tabular-nums",
-                  playbookStats.leakR < 0
-                    ? "text-rose-600 dark:text-rose-400"
-                    : "text-emerald-600 dark:text-emerald-400"
-                )}
-              >
-                {playbookStats.leakR > 0 ? "+" : ""}
-                {formatNumber(playbookStats.leakR)}R
-              </p>
-              {executionStats.winCount >= 1 && (
-                <div className="mt-3 pt-3 border-t border-border/20 text-xs text-muted-foreground">
-                  Target hit {formatNumber(executionStats.targetHitRate, 0)}% ·
-                  Avg capture {formatNumber(executionStats.avgCapture, 0)}%
-                </div>
-              )}
-            </div>
-          </section>
+          {selectedEventName && (
+            <NewsEventDetailModal
+              eventName={selectedEventName}
+              trades={eventTrades}
+              open={!!selectedEventName}
+              onOpenChange={(open) => {
+                if (!open) setSelectedEventName(null);
+              }}
+            />
+          )}
         </>
       )}
     </div>

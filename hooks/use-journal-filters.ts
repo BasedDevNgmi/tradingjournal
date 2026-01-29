@@ -14,6 +14,8 @@ export function useJournalFilters(setActiveTab: (tab: TabType) => void) {
   const [selectedSetup, setSelectedSetup] = React.useState("all");
   const [selectedPair, setSelectedPair] = React.useState("all");
   const [selectedDirection, setSelectedDirection] = React.useState("all");
+  const [selectedNewsDay, setSelectedNewsDay] = React.useState("all");
+  const [selectedNewsEvent, setSelectedNewsEvent] = React.useState("all");
 
   const resetFilters = React.useCallback(() => {
     setFilter(['All']);
@@ -23,6 +25,8 @@ export function useJournalFilters(setActiveTab: (tab: TabType) => void) {
     setSelectedSetup("all");
     setSelectedPair("all");
     setSelectedDirection("all");
+    setSelectedNewsDay("all");
+    setSelectedNewsEvent("all");
     setTimeFilter('ALL');
   }, [setTimeFilter]);
 
@@ -48,6 +52,10 @@ export function useJournalFilters(setActiveTab: (tab: TabType) => void) {
     setSelectedPair,
     selectedDirection,
     setSelectedDirection,
+    selectedNewsDay,
+    setSelectedNewsDay,
+    selectedNewsEvent,
+    setSelectedNewsEvent,
     resetFilters,
     handleStatClick
   };

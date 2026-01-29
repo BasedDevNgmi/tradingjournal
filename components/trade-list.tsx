@@ -27,6 +27,10 @@ interface TradeListProps {
   setSelectedPair: (pair: string) => void;
   selectedDirection: string;
   setSelectedDirection: (direction: string) => void;
+  selectedNewsDay: string;
+  setSelectedNewsDay: (value: string) => void;
+  selectedNewsEvent: string;
+  setSelectedNewsEvent: (event: string) => void;
   resetFilters: () => void;
   mounted: boolean;
   isMissedView?: boolean;
@@ -47,6 +51,10 @@ export function TradeList({
   setSelectedPair,
   selectedDirection,
   setSelectedDirection,
+  selectedNewsDay,
+  setSelectedNewsDay,
+  selectedNewsEvent,
+  setSelectedNewsEvent,
   resetFilters,
   mounted,
   isMissedView = false
@@ -98,6 +106,24 @@ export function TradeList({
       result = result.filter(trade => trade.direction.toLowerCase() === selectedDirection.toLowerCase());
     }
 
+    // News day filtering
+    if (selectedNewsDay !== 'all') {
+      if (selectedNewsDay === 'yes') {
+        result = result.filter((trade) => trade.isNewsDay === true);
+      } else {
+        result = result.filter((trade) => trade.isNewsDay !== true);
+      }
+    }
+
+    // News event filtering
+    if (selectedNewsEvent !== 'all') {
+      if (selectedNewsEvent === 'not set') {
+        result = result.filter(trade => !trade.newsEvent?.trim());
+      } else {
+        result = result.filter(trade => (trade.newsEvent?.trim() ?? "") === selectedNewsEvent);
+      }
+    }
+
     // Text Search — pair, notes, lessonLearned, tags, psychoTags; "BTC" matches "BTC/USDT"
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -123,7 +149,7 @@ export function TradeList({
     }
 
     return result;
-  }, [trades, filter, sortBy, searchQuery, selectedSetup, timeFilter, isMissedView, dateRange, selectedPair, selectedDirection]);
+  }, [trades, filter, sortBy, searchQuery, selectedSetup, timeFilter, isMissedView, dateRange, selectedPair, selectedDirection, selectedNewsDay, selectedNewsEvent]);
 
   const groupedTrades = React.useMemo(() => {
     return groupTradesByDate(filteredAndSortedTrades);

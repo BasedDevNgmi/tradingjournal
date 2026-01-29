@@ -17,6 +17,10 @@ interface FiltersPopoverProps {
   setSelectedPair: (s: string) => void;
   selectedDirection: string;
   setSelectedDirection: (s: string) => void;
+  selectedNewsDay: string;
+  setSelectedNewsDay: (s: string) => void;
+  selectedNewsEvent: string;
+  setSelectedNewsEvent: (s: string) => void;
   resetFilters: () => void;
   activeTab: TabType;
 }
@@ -38,6 +42,10 @@ export function FiltersPopover({
   setSelectedPair,
   selectedDirection,
   setSelectedDirection,
+  selectedNewsDay,
+  setSelectedNewsDay,
+  selectedNewsEvent,
+  setSelectedNewsEvent,
   resetFilters,
   activeTab,
 }: FiltersPopoverProps) {
@@ -47,6 +55,14 @@ export function FiltersPopover({
     () => getUniquePairsByFrequency(trades).map((x) => x.pair),
     [trades]
   );
+  const uniqueNewsEvents = React.useMemo(() => {
+    const set = new Set<string>();
+    trades.forEach((t) => {
+      const v = t.newsEvent?.trim();
+      if (v) set.add(v);
+    });
+    return Array.from(set).sort();
+  }, [trades]);
 
   const isJournalOrMissed = activeTab === "journal" || activeTab === "missed";
   const hasActiveFilters =
@@ -54,7 +70,9 @@ export function FiltersPopover({
     ((filter.length > 0 && !(filter.length === 1 && filter[0] === "All")) ||
       selectedSetup !== "all" ||
       selectedPair !== "all" ||
-      selectedDirection !== "all");
+      selectedDirection !== "all" ||
+      selectedNewsDay !== "all" ||
+      selectedNewsEvent !== "all");
 
   const toggleStatus = (status: FilterType | "All") => {
     if (status === "All") {
@@ -188,6 +206,60 @@ export function FiltersPopover({
                       )}
                     >
                       {d === "all" ? "All" : d}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-2">News day</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {["all", "yes", "no"].map((value) => (
+                    <button
+                      key={value}
+                      onClick={() => setSelectedNewsDay(value)}
+                      className={cn(
+                        "px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                        selectedNewsDay === value ? "bg-primary-accent text-white" : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                      )}
+                    >
+                      {value === "all" ? "All" : value === "yes" ? "Yes" : "No"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-2">News event</p>
+                <div className="flex flex-wrap gap-1.5 max-h-[140px] overflow-y-auto scrollbar-thin">
+                  <button
+                    onClick={() => setSelectedNewsEvent("all")}
+                    className={cn(
+                      "px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                      selectedNewsEvent === "all" ? "bg-primary-accent text-white" : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setSelectedNewsEvent("not set")}
+                    className={cn(
+                      "px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                      selectedNewsEvent === "not set" ? "bg-primary-accent text-white" : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    Not set
+                  </button>
+                  {uniqueNewsEvents.map((event) => (
+                    <button
+                      key={event}
+                      onClick={() => setSelectedNewsEvent(event)}
+                      className={cn(
+                        "px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                        selectedNewsEvent === event ? "bg-primary-accent text-white" : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                      )}
+                    >
+                      {event}
                     </button>
                   ))}
                 </div>
