@@ -51,20 +51,35 @@ export function IdentitySection({
           <Calendar size={12} />
           <span className="text-xs font-medium mono-data">{dateFormatted}</span>
         </div>
-        <select
-          value={trade.session ?? ""}
-          onChange={(e) =>
-            onUpdate({
-              session: (e.target.value || undefined) as Trade["session"],
-            })
-          }
-          className="flex items-center gap-1.5 text-xs font-medium bg-muted/20 border border-border/50 rounded-lg px-2.5 py-1.5 outline-none focus:border-primary-accent"
-        >
-          <option value="">No session</option>
-          <option value="Asia">Asia</option>
-          <option value="London">London</option>
-          <option value="New York">New York</option>
-        </select>
+        <div className="flex flex-wrap gap-2">
+          {(["Asia", "London", "New York"] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => onUpdate({ session: s })}
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors",
+                trade.session === s
+                  ? "bg-primary-accent border-primary-accent text-white"
+                  : "bg-muted/20 border-border/50 text-muted-foreground hover:text-foreground outline-none focus:border-primary-accent"
+              )}
+            >
+              {s === "New York" ? "NY" : s}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => onUpdate({ session: undefined })}
+            className={cn(
+              "px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors",
+              !trade.session
+                ? "bg-muted border-border text-muted-foreground"
+                : "bg-muted/20 border-border/50 text-muted-foreground hover:text-foreground outline-none focus:border-primary-accent"
+            )}
+          >
+            No session
+          </button>
+        </div>
         <div className="flex flex-col gap-2">
           <span className="text-xs font-medium text-muted-foreground">News day</span>
           <div className="flex gap-2">

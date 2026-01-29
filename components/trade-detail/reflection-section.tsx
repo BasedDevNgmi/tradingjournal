@@ -25,13 +25,31 @@ export function ReflectionSection({
 }: ReflectionSectionProps) {
   const confluenceCount = trade.confluences?.length || 0;
   const qualityLevel = getQualityLevel(trade.confluences);
-  const { colorClass: qualityColor, label: levelLabel } = getQualityLevelStyle(qualityLevel);
+  const { colorClass: qualityColor, label: levelLabel, formLabel } = getQualityLevelStyle(qualityLevel);
   const levelBorder =
     qualityLevel === 3 ? "bg-emerald-500/10 border-emerald-500/30" : qualityLevel === 2 ? "bg-orange-500/10 border-orange-500/30" : "bg-rose-500/10 border-rose-500/30";
+
+  const isClosed = trade.status !== "Open" && trade.status !== "Missed";
+  const n = trade.confluences?.length ?? 0;
+  const planPart =
+    isClosed && trade.followedPlan != null
+      ? trade.followedPlan
+        ? "Followed plan"
+        : "Did not follow plan"
+      : null;
+  const setupPart = n > 0 ? `${formLabel} · ${n} confluences` : null;
+  const openSetupPart = !isClosed && n > 0 ? `Tier ${qualityLevel} setup · ${n} confluences` : null;
+  const contextParts = planPart ? [planPart, setupPart] : isClosed ? [setupPart] : [openSetupPart];
+  const contextLine = contextParts.filter(Boolean).join(" · ");
 
   if (isEditing && onUpdate) {
     return (
       <div className="space-y-10">
+        {contextLine && (
+          <p className="text-sm text-muted-foreground pb-2 border-b border-border/30" aria-live="polite">
+            {contextLine}
+          </p>
+        )}
         <section className="space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 text-muted-foreground/40">
@@ -131,6 +149,11 @@ export function ReflectionSection({
 
   return (
     <div className="space-y-10">
+      {contextLine && (
+        <p className="text-sm text-muted-foreground pb-2 border-b border-border/30" aria-live="polite">
+          {contextLine}
+        </p>
+      )}
       <section className="space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2 text-muted-foreground/40">

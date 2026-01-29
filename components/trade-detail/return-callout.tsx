@@ -2,6 +2,7 @@
 
 import { Trade } from "@/types";
 import { cn, formatNumber } from "@/lib/utils";
+import { getQualityLevel, getQualityLevelStyle } from "@/lib/trade-utils";
 import { Check, X } from "lucide-react";
 
 interface ReturnCalloutProps {
@@ -14,6 +15,10 @@ export function ReturnCallout({ trade }: ReturnCalloutProps) {
   const rrLabel = isClosed ? "Realized" : "Target";
   const rrPositive = rr > 0;
   const rrNegative = rr < 0;
+  const confluenceCount = trade.confluences?.length ?? 0;
+  const qualityLevel = getQualityLevel(trade.confluences);
+  const { formLabel } = getQualityLevelStyle(qualityLevel);
+  const setupSummary = confluenceCount > 0 ? `${formLabel} · ${confluenceCount} confluences` : null;
 
   const pnlSym = (trade.pnlAmount ?? 0) >= 0 ? "+" : "";
   const pnlFormatted =
@@ -26,7 +31,7 @@ export function ReturnCallout({ trade }: ReturnCalloutProps) {
   return (
     <div
       className={cn(
-        "rounded-xl border-2 p-4 md:p-5",
+        "rounded-2xl border-2 p-4 md:p-5",
         rrPositive && "bg-emerald-500/5 border-emerald-500/20",
         rrNegative && "bg-rose-500/5 border-rose-500/20",
         !rrPositive && !rrNegative && "bg-muted/10 border-border/40"
@@ -49,6 +54,9 @@ export function ReturnCallout({ trade }: ReturnCalloutProps) {
               ? `${rr > 0 ? "+" : ""}${formatNumber(rr, 2)}R`
               : `${formatNumber(rr, 2)}R`}
           </span>
+          {setupSummary && (
+            <span className="text-xs font-medium text-muted-foreground/80 mt-1">{setupSummary}</span>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-3 text-sm">
           {pnlFormatted && (

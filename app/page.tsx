@@ -20,7 +20,8 @@ import { MobileSidebar } from "@/components/layout/mobile-sidebar";
 import { SettingsSidebar } from "@/components/layout/settings-sidebar";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { GlobalErrorBoundary } from "@/components/ui/error-boundary";
-import { OPEN_ADD_TRADE_EVENT, TOGGLE_SIDEBAR_EVENT } from "@/components/keyboard-shortcuts";
+import { OPEN_ADD_TRADE_EVENT, OPEN_ADD_TRADE_WITH_INITIAL_EVENT, TOGGLE_SIDEBAR_EVENT } from "@/components/keyboard-shortcuts";
+import { Trade } from "@/types";
 
 export default function Home() {
   const { 
@@ -50,11 +51,26 @@ export default function Home() {
     resetFilters
   } = useJournalFilters(setActiveTab);
 
+  const [addModalInitialData, setAddModalInitialData] = React.useState<Partial<Trade> | null>(null);
+
   // Listen for global "N" shortcut to open add-trade modal (from layout keyboard-shortcuts)
   React.useEffect(() => {
     const onOpenAddTrade = () => setIsAddModalOpen(true);
     window.addEventListener(OPEN_ADD_TRADE_EVENT, onOpenAddTrade);
     return () => window.removeEventListener(OPEN_ADD_TRADE_EVENT, onOpenAddTrade);
+  }, [setIsAddModalOpen]);
+
+  // Listen for "open add modal with initial data" (e.g. from detail modal "Duplicate and edit")
+  React.useEffect(() => {
+    const onOpenWithInitial = (e: Event) => {
+      const customEvent = e as CustomEvent<{ initialData: Partial<Trade> }>;
+      if (customEvent.detail?.initialData) {
+        setAddModalInitialData(customEvent.detail.initialData);
+        setIsAddModalOpen(true);
+      }
+    };
+    window.addEventListener(OPEN_ADD_TRADE_WITH_INITIAL_EVENT, onOpenWithInitial);
+    return () => window.removeEventListener(OPEN_ADD_TRADE_WITH_INITIAL_EVENT, onOpenWithInitial);
   }, [setIsAddModalOpen]);
 
   // Listen for Mod+B to toggle sidebar (from layout keyboard-shortcuts)
@@ -196,13 +212,20 @@ export default function Home() {
         onClose={() => setIsSettingsOpen(false)}
       />
 
-      <AddTradeModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} />
+      <AddTradeModal
+        open={isAddModalOpen}
+        onOpenChange={(open) => {
+          setIsAddModalOpen(open);
+          if (!open) setAddModalInitialData(null);
+        }}
+        initialData={addModalInitialData ?? undefined}
+      />
 
       <motion.button 
         whileHover={reduceMotion ? undefined : { scale: 1.02 }}
         whileTap={reduceMotion ? undefined : { scale: 0.98 }}
         onClick={() => setIsAddModalOpen(true)}
-        title="New trade (⌘N)"
+        title="Log trade (⌘N)"
         className="fixed z-50 w-14 h-14 rounded-full bg-primary-accent text-white shadow-md hover:shadow-lg ring-4 ring-primary-accent/20 flex items-center justify-center transition-shadow bottom-[max(2.5rem,env(safe-area-inset-bottom))] right-[max(2.5rem,env(safe-area-inset-right))]"
       >
         <Plus size={24} strokeWidth={2.5} className="text-white" />

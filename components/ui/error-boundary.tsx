@@ -30,7 +30,11 @@ export class GlobalErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         this.props.fallback || (
-          <div className="flex flex-col items-center justify-center min-h-[400px] p-10 rounded-[2.5rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl text-center space-y-6">
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="flex flex-col items-center justify-center min-h-[400px] p-10 rounded-[2.5rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl text-center space-y-6"
+          >
             <div className="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center shadow-2xl shadow-rose-500/20 border border-rose-500/20">
               <AlertTriangle className="text-rose-500" size={32} />
             </div>
@@ -40,9 +44,10 @@ export class GlobalErrorBoundary extends Component<Props, State> {
                 An isolated component error has occurred. The workbench remains active.
               </p>
             </div>
-            <Button 
+            <Button
               onClick={() => this.setState({ hasError: false })}
               className="bg-primary-accent text-white h-12 px-8 rounded-lg text-sm font-medium shadow-md"
+              aria-label="Retry and reload this section"
             >
               <RefreshCcw className="mr-2 w-3.5 h-3.5" />
               Reboot Node

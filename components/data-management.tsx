@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useTradesData } from "@/context/trade-context";
 import { Button } from "@/components/ui/button";
 import { Download, Upload } from "lucide-react";
@@ -15,9 +16,23 @@ function escapeCsvCell (val: unknown): string {
   return s;
 }
 
+type ImportConfirmState = {
+  count: number;
+  range: string;
+  data: Trade[];
+} | null;
+
 export function DataManagement() {
   const { trades, importTrades } = useTradesData();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importConfirm, setImportConfirm] = React.useState<ImportConfirmState>(null);
+  const cancelImportRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    if (importConfirm && cancelImportRef.current) {
+      cancelImportRef.current.focus();
+    }
+  }, [importConfirm]);
 
   const handleExport = () => {
     const dataStr = JSON.stringify(trades, null, 2);
@@ -77,21 +92,61 @@ export function DataManagement() {
             : dates.length === 1
               ? format(new Date(dates[0]), "d MMM yyyy")
               : `${format(new Date(Math.min(...dates.map((d) => new Date(d).getTime()))), "d MMM yyyy")} – ${format(new Date(Math.max(...dates.map((d) => new Date(d).getTime()))), "d MMM yyyy")}`;
-        const msg = `Import ${importedData.length} trades (${range})? This will replace your current data.`;
-        if (window.confirm(msg)) {
-          importTrades(importedData);
-          toast.success("Backup restored", { description: `Imported ${importedData.length} trades.` });
-        }
+        setImportConfirm({ count: importedData.length, range, data: importedData });
       } catch {
         toast.error("Import error", { description: "Could not read file. Use a valid JSON backup." });
       }
-      if (fileInputRef.current) fileInputRef.current.value = "";
     };
     fileReader.readAsText(file);
   };
 
+  const handleConfirmImport = () => {
+    if (!importConfirm) return;
+    importTrades(importConfirm.data);
+    toast.success("Backup restored", { description: `Imported ${importConfirm.count} trades.` });
+    setImportConfirm(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleCancelImport = () => {
+    setImportConfirm(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {importConfirm && (
+        <div
+          className="absolute inset-0 z-20 flex items-center justify-center p-4 bg-background/90 backdrop-blur-sm rounded-2xl"
+          role="alertdialog"
+          aria-labelledby="import-dialog-title"
+          aria-describedby="import-dialog-desc"
+        >
+          <div className="bg-card border border-border rounded-xl shadow-xl p-6 max-w-sm w-full space-y-4">
+            <h3 id="import-dialog-title" className="text-lg font-semibold text-foreground">
+              Import backup?
+            </h3>
+            <p id="import-dialog-desc" className="text-sm text-muted-foreground">
+              Import {importConfirm.count} trades ({importConfirm.range}). This will replace your
+              current journal data.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <Button
+                ref={cancelImportRef}
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={handleCancelImport}
+              >
+                Cancel
+              </Button>
+              <Button type="button" className="flex-1" onClick={handleConfirmImport}>
+                Import
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex flex-col gap-4">
         <div className="p-5 rounded-2xl border border-border bg-muted/30 space-y-4">
           <div className="flex items-center gap-2">

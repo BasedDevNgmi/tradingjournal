@@ -13,6 +13,8 @@ import { calculateRealizedRR } from "@/lib/trade-utils";
 interface AddTradeModalProps {
   defaultType?: "live" | "missed";
   defaultMode?: "live" | "missed" | "past";
+  /** When set (e.g. from "Duplicate and edit"), form is prefilled with this trade. */
+  initialData?: Partial<Trade> | Trade | null;
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -21,6 +23,7 @@ interface AddTradeModalProps {
 export function AddTradeModal({
   defaultType = "live",
   defaultMode,
+  initialData: externalInitialData,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
 }: AddTradeModalProps) {
@@ -30,7 +33,7 @@ export function AddTradeModal({
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = setControlledOpen !== undefined ? setControlledOpen : setInternalOpen;
 
-  const resolveMode = defaultMode ?? (defaultType === "missed" ? "missed" : "live");
+  const resolveMode = defaultMode ?? (defaultType === "missed" ? "missed" : "past");
 
   const handleAddTrade = (data: TradeFormValues, calculatedRR: number) => {
     const isPast = data.status === "Win" || data.status === "Loss" || data.status === "Breakeven";
@@ -90,11 +93,13 @@ export function AddTradeModal({
   };
 
   const initialData =
-    resolveMode === "missed"
-      ? ({ status: "Missed" } as Partial<Trade>)
-      : resolveMode === "past"
-        ? ({ status: "Win", date: new Date().toISOString() } as Partial<Trade>)
-        : undefined;
+    externalInitialData != null && Object.keys(externalInitialData).length > 0
+      ? (externalInitialData as Partial<Trade>)
+      : resolveMode === "missed"
+        ? ({ status: "Missed" } as Partial<Trade>)
+        : resolveMode === "past"
+          ? ({ status: "Win", date: new Date().toISOString() } as Partial<Trade>)
+          : undefined;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -103,15 +108,16 @@ export function AddTradeModal({
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <div className="sr-only">
-          <DialogTitle>Add new trade</DialogTitle>
+          <DialogTitle>Log trade</DialogTitle>
         </div>
         <ModalShell
-          title="Add new trade"
-          subtitle="Live entry, missed setup, or log a past trade"
+          title="Log trade"
+          subtitle="Log a past trade, live entry, or missed setup"
           onClose={() => setOpen(false)}
           bodyClassName="p-0"
         >
           <TradeForm
+            key={initialData?.id ?? "new"}
             onSubmit={handleAddTrade}
             initialData={initialData as Partial<Trade> | undefined}
           />

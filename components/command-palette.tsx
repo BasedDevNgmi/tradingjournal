@@ -79,7 +79,7 @@ export function CommandPalette() {
                 </Command.Group>
 
                 <Command.Group heading="Actions" className="px-2 py-1.5 mt-2 text-xs font-medium text-muted-foreground">
-                  <CommandItem onSelect={() => runCommand(() => setIsAddModalOpen(true))} icon={Plus} label="Add new trade" shortcut="⌘N" color="text-primary-accent" />
+                  <CommandItem onSelect={() => runCommand(() => setIsAddModalOpen(true))} icon={Plus} label="Log trade" shortcut="⌘N" color="text-primary-accent" />
                   <CommandItem onSelect={() => runCommand(() => resetFilters())} icon={Zap} label="Reset filters" />
                 </Command.Group>
 

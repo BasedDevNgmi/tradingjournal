@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 
 const OPEN_ADD_TRADE_EVENT = "journal:open-add-trade";
+const OPEN_ADD_TRADE_WITH_INITIAL_EVENT = "journal:open-add-trade-with-initial";
 const TOGGLE_SIDEBAR_EVENT = "journal:toggle-sidebar";
 
 export function KeyboardShortcuts() {
@@ -37,4 +38,4 @@ export function KeyboardShortcuts() {
   return null;
 }
 
-export { OPEN_ADD_TRADE_EVENT, TOGGLE_SIDEBAR_EVENT };
+export { OPEN_ADD_TRADE_EVENT, OPEN_ADD_TRADE_WITH_INITIAL_EVENT, TOGGLE_SIDEBAR_EVENT };

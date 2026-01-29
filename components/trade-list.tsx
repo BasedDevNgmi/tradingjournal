@@ -199,7 +199,9 @@ export function TradeList({
           <p className="text-sm font-medium text-muted-foreground mt-2 text-center px-8 max-w-[320px] leading-relaxed">
             {isMissedView 
               ? "Zero missed setups detected. Your discipline is your greatest asset." 
-              : "No trades found in this period. Wait for your setup, don't force the market."}
+              : trades.length === 0 
+                ? "Log a past trade to get started." 
+                : "No trades match the current filters."}
           </p>
           {!isMissedView && (
             <Button
