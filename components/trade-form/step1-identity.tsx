@@ -111,9 +111,9 @@ export function Step1Identity({ form }: Step1IdentityProps) {
                     "flex-1 py-2.5 text-sm font-medium rounded-lg border transition-colors",
                     formData.status === outcome
                       ? outcome === "Win"
-                        ? "bg-emerald-500 border-emerald-500 text-white"
+                        ? "bg-success border-success text-white"
                         : outcome === "Loss"
-                          ? "bg-rose-500 border-rose-500 text-white"
+                          ? "bg-danger border-danger text-white"
                           : "bg-muted-foreground border-muted-foreground text-white"
                       : "bg-card border-border text-muted-foreground hover:text-foreground"
                   )}

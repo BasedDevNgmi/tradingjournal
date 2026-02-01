@@ -14,7 +14,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     setMounted(true);
   }, []);
 
-  if (!mounted) return <div className={cn("w-10 h-10 border-4 border-black dark:border-white", className)} />;
+  if (!mounted) return <div className={cn("w-10 h-10 border-2 border-border bg-muted/30 rounded-xl", className)} />;
 
   return (
     <button

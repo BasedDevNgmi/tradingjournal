@@ -51,7 +51,7 @@ export function Step3Execution({ form, calculatedRR }: Step3ExecutionProps) {
           </span>
           <span className={cn(
             "text-lg font-semibold tracking-tight",
-            (pastMode ? realizedRR ?? 0 : calculatedRR) >= 2.5 ? "text-emerald-400" : (pastMode ? realizedRR ?? 0 : calculatedRR) >= 1.5 ? "text-orange-400" : "text-rose-400"
+            (pastMode ? realizedRR ?? 0 : calculatedRR) >= 2.5 ? "text-success" : (pastMode ? realizedRR ?? 0 : calculatedRR) >= 1.5 ? "text-warning" : "text-danger"
           )}>
             {pastMode
               ? (realizedRR != null ? formatNumber(realizedRR, 2) : "—") + "R"
@@ -73,7 +73,7 @@ export function Step3Execution({ form, calculatedRR }: Step3ExecutionProps) {
                   className={cn(
                     "flex-1 py-2.5 text-sm font-medium rounded-md transition-colors",
                     formData.direction === d
-                      ? d === "Long" ? "bg-emerald-500 text-white shadow-md" : "bg-rose-500 text-white shadow-md"
+                      ? d === "Long" ? "bg-success text-white shadow-md" : "bg-danger text-white shadow-md"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -95,7 +95,7 @@ export function Step3Execution({ form, calculatedRR }: Step3ExecutionProps) {
               <span className="text-base font-medium opacity-50">%</span>
             </div>
             {errors.riskPercent?.message && (
-              <p className="text-xs font-medium text-rose-600 dark:text-rose-400 ml-1" role="alert">{errors.riskPercent.message}</p>
+              <p className="text-xs font-medium text-danger ml-1" role="alert">{errors.riskPercent.message}</p>
             )}
           </div>
         </div>
@@ -103,8 +103,8 @@ export function Step3Execution({ form, calculatedRR }: Step3ExecutionProps) {
         <div className="grid grid-cols-1 gap-4">
           {[
             { id: "entryPrice" as const, label: "Entry Price", color: "focus-within:border-primary" },
-            { id: "stopLoss" as const, label: "Stop Loss", color: "focus-within:border-rose-500" },
-            { id: "takeProfit" as const, label: "Take Profit", color: "focus-within:border-emerald-500" },
+            { id: "stopLoss" as const, label: "Stop Loss", color: "focus-within:border-danger" },
+            { id: "takeProfit" as const, label: "Take Profit", color: "focus-within:border-success" },
           ].map((f) => (
             <div key={f.id} className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground ml-1">{f.label}</label>
@@ -117,7 +117,7 @@ export function Step3Execution({ form, calculatedRR }: Step3ExecutionProps) {
                 />
               </div>
               {errors[f.id]?.message && (
-                <p className="text-xs font-medium text-rose-600 dark:text-rose-400 ml-1" role="alert">{errors[f.id]?.message}</p>
+                <p className="text-xs font-medium text-danger ml-1" role="alert">{errors[f.id]?.message}</p>
               )}
             </div>
           ))}
@@ -133,7 +133,7 @@ export function Step3Execution({ form, calculatedRR }: Step3ExecutionProps) {
                 />
               </div>
               {errors.exitPrice?.message && (
-                <p className="text-xs font-medium text-rose-600 dark:text-rose-400 ml-1" role="alert">{errors.exitPrice.message}</p>
+                <p className="text-xs font-medium text-danger ml-1" role="alert">{errors.exitPrice.message}</p>
               )}
             </div>
           )}

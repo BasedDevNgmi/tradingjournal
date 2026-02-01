@@ -31,9 +31,9 @@ export function Step2Playbook({ form, setupQuality, toggleArrayItem }: Step2Play
         </div>
         <div className={cn(
           "px-3 py-1.5 rounded-lg border font-medium text-xs transition-colors",
-          setupQuality.level === 3 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" :
-          setupQuality.level === 2 ? "bg-orange-500/10 border-orange-500/20 text-orange-500" :
-          "bg-rose-500/10 border-rose-500/20 text-rose-500"
+          setupQuality.level === 3 ? "bg-success/10 border-success/20 text-success" :
+          setupQuality.level === 2 ? "bg-warning/10 border-warning/20 text-warning" :
+          "bg-danger/10 border-danger/20 text-danger"
         )}>
           {setupQuality.label} • {setupQuality.risk}
         </div>

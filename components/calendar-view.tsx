@@ -139,7 +139,7 @@ export function CalendarView({ trades: tradesProp }: CalendarViewProps = {}) {
                     <>
                       <div className={cn(
                         "px-2 py-1 rounded-lg text-xs font-semibold tracking-tight",
-                        dailyR > 0 ? "bg-emerald-500/10 text-emerald-500" : dailyR < 0 ? "bg-rose-500/10 text-rose-500" : "bg-muted text-muted-foreground"
+                        dailyR > 0 ? "bg-success/10 text-success" : dailyR < 0 ? "bg-danger/10 text-danger" : "bg-muted text-muted-foreground"
                       )}>
                         {dailyR > 0 ? '+' : ''}{dailyR.toFixed(1)}R
                       </div>
@@ -149,7 +149,7 @@ export function CalendarView({ trades: tradesProp }: CalendarViewProps = {}) {
                             key={i} 
                             className={cn(
                               "w-1 h-1 rounded-full",
-                              t.status === 'Win' ? "bg-emerald-500" : t.status === 'Loss' ? "bg-rose-500" : "bg-muted-foreground/40"
+                              t.status === 'Win' ? "bg-success" : t.status === 'Loss' ? "bg-danger" : "bg-muted-foreground/40"
                             )} 
                           />
                         ))}

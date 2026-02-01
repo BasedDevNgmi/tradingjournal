@@ -39,7 +39,7 @@ const CustomTooltip = ({ active, payload }: any) => {
             <div className="flex items-baseline gap-2">
               <span className={cn(
                 "text-xl font-semibold tracking-tight transition-colors",
-                payload[0].value >= 0 ? "text-emerald-500" : "text-rose-500",
+                payload[0].value >= 0 ? "text-success" : "text-danger",
                 isGhostMode && "blur-md select-none"
               )}>
                 {payload[0].value > 0 ? "+" : ""}
@@ -57,7 +57,7 @@ const CustomTooltip = ({ active, payload }: any) => {
               <div className="flex items-center justify-between gap-6">
                 <span className="text-sm font-medium text-foreground">{data.bestTrade.pair}</span>
                 <span className={cn(
-                  "text-sm font-semibold text-emerald-600 dark:text-emerald-400",
+                  "text-sm font-semibold text-success",
                   isGhostMode && "blur-md select-none"
                 )}>
                   +{data.bestTrade.rrRealized.toFixed(2)}R

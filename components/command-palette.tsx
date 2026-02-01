@@ -41,7 +41,7 @@ export function CommandPalette() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+            className="overlay-backdrop"
             onClick={() => setOpen(false)}
             aria-hidden
           />

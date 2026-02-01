@@ -65,7 +65,7 @@ export function StatsOverview({ onStatClick, activeFilter, activeTab = 'journal'
   if (variant === 'compact') {
     return (
       <div className="flex items-center gap-4 overflow-x-auto no-scrollbar shrink-0">
-        <StatItem label="Performance" value={`${stats.totalR > 0 ? '+' : ''}${formatNumber(stats.totalR, 2)}`} subValue="R" color={stats.totalR >= 0 ? "text-emerald-500" : "text-rose-500"} />
+        <StatItem label="Performance" value={`${stats.totalR > 0 ? '+' : ''}${formatNumber(stats.totalR, 2)}`} subValue="R" color={stats.totalR >= 0 ? "text-success" : "text-danger"} />
         <div className="w-px h-5 bg-border/20 shrink-0 hidden sm:block" />
         <div className="hidden md:block">
           <StatItem label="Win Rate" value={`${formatNumber(stats.winRate, 0)}%`} subValue="WR" color="text-foreground/80" />
@@ -76,13 +76,13 @@ export function StatsOverview({ onStatClick, activeFilter, activeTab = 'journal'
 
   return (
     <div className="flex items-center gap-10 overflow-x-auto no-scrollbar">
-      <StatItem label="Performance" value={`${stats.totalR > 0 ? '+' : ''}${formatNumber(stats.totalR, 2)}`} subValue="R" color={stats.totalR >= 0 ? "text-emerald-500" : "text-rose-500"} />
+      <StatItem label="Performance" value={`${stats.totalR > 0 ? '+' : ''}${formatNumber(stats.totalR, 2)}`} subValue="R" color={stats.totalR >= 0 ? "text-success" : "text-danger"} />
       <div className="w-px h-6 bg-border/20 shrink-0" />
       <StatItem label="Win Rate" value={`${formatNumber(stats.winRate, 0)}%`} subValue="WR" color="text-foreground/80" />
       <div className="w-px h-6 bg-border/20 shrink-0 hidden sm:block" />
       <div className="flex items-center gap-10">
-        <StatItem label="Wins" value={stats.wins.toString()} subValue="T" color="text-emerald-500/80" filterType="Win" />
-        <StatItem label="Losses" value={stats.losses.toString()} subValue="T" color="text-rose-500/80" filterType="Loss" />
+        <StatItem label="Wins" value={stats.wins.toString()} subValue="T" color="text-success/80" filterType="Win" />
+        <StatItem label="Losses" value={stats.losses.toString()} subValue="T" color="text-danger/80" filterType="Loss" />
       </div>
     </div>
   );

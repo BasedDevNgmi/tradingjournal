@@ -28,14 +28,14 @@ export function formatNumber(value: number, decimals: number = 2) {
 }
 
 export function getRRColor(rr: number) {
-  if (rr > 0) return "text-emerald-500";
-  if (rr < 0) return "text-rose-500";
+  if (rr > 0) return "text-success";
+  if (rr < 0) return "text-danger";
   return "text-muted-foreground";
 }
 
 export function getRRBgColor(rr: number) {
-  if (rr > 0) return "bg-emerald-500/10";
-  if (rr < 0) return "bg-rose-500/10";
+  if (rr > 0) return "bg-success/10";
+  if (rr < 0) return "bg-danger/10";
   return "bg-muted";
 }
 

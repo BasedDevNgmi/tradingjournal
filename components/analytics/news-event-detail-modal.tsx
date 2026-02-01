@@ -5,6 +5,7 @@ import { Trade } from "@/types";
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { modalContentClass } from "@/components/ui/modal-shell";
 import { ModalShell } from "@/components/ui/modal-shell";
@@ -79,6 +80,9 @@ export function NewsEventDetailModal({
         className={cn(modalContentClass.detail, "max-w-2xl")}
         aria-describedby={undefined}
       >
+        <div className="sr-only">
+          <DialogTitle>News event — {eventName}</DialogTitle>
+        </div>
         <ModalShell
           title={eventName}
           onClose={() => onOpenChange(false)}
@@ -223,8 +227,8 @@ export function NewsEventDetailModal({
                           className={cn(
                             "text-xs font-medium px-2 py-0.5 rounded-full",
                             trade.direction === "Long"
-                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                              : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                              ? "bg-success/10 text-success"
+                              : "bg-danger/10 text-danger"
                           )}
                         >
                           {trade.direction}
@@ -233,9 +237,9 @@ export function NewsEventDetailModal({
                           className={cn(
                             "text-xs font-medium",
                             trade.status === "Win"
-                              ? "text-emerald-600 dark:text-emerald-400"
+                              ? "text-success"
                               : trade.status === "Loss"
-                                ? "text-rose-600 dark:text-rose-400"
+                                ? "text-danger"
                                 : "text-muted-foreground"
                           )}
                         >

@@ -73,9 +73,9 @@ export function DetailHeader({
               "text-3xl md:text-4xl font-bold tracking-tight mono-data tabular-nums leading-tight",
               isClosed
                 ? rr > 0
-                  ? "text-emerald-500 dark:text-emerald-400"
+                  ? "text-success"
                   : rr < 0
-                    ? "text-rose-500 dark:text-rose-400"
+                    ? "text-danger"
                     : "text-foreground"
                 : "text-foreground"
             )}
@@ -86,7 +86,7 @@ export function DetailHeader({
             <span
               className={cn(
                 "text-xs font-semibold mono-data tabular-nums",
-                (trade.pnlAmount ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                (trade.pnlAmount ?? 0) >= 0 ? "text-success" : "text-danger"
               )}
             >
               {pnlFormatted}
@@ -107,8 +107,8 @@ export function DetailHeader({
           <span
             className={cn(
               "shrink-0 flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium",
-              isWin && "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
-              isLoss && "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20",
+              isWin && "bg-success/10 text-success border border-success/20",
+              isLoss && "bg-danger/10 text-danger border border-danger/20",
               isBE && "bg-muted text-muted-foreground border border-border",
               !isWin && !isLoss && !isBE && "bg-muted/50 text-muted-foreground border border-border/50"
             )}
@@ -116,7 +116,7 @@ export function DetailHeader({
             <span
               className={cn(
                 "w-1.5 h-1.5 rounded-full shrink-0",
-                isWin ? "bg-emerald-500" : isLoss ? "bg-rose-500" : isBE ? "bg-zinc-400" : "bg-blue-500"
+                isWin ? "bg-success" : isLoss ? "bg-danger" : isBE ? "bg-zinc-400" : "bg-primary-accent"
               )}
             />
             {trade.status}
@@ -186,7 +186,7 @@ export function DetailHeader({
                 )}
                 <DropdownMenuItem
                   onClick={onDelete}
-                  className="text-rose-600 dark:text-rose-400 focus:text-rose-600 focus:bg-rose-500/10"
+                  className="text-danger focus:text-danger focus:bg-danger/10"
                 >
                   <Trash2 size={14} className="mr-2" />
                   Delete

@@ -85,7 +85,7 @@ export function CloseTradeWizard({ onCloseTrade, onCancel }: CloseTradeWizardPro
                 "p-5 rounded-lg border flex flex-col items-center gap-2 transition-colors h-[88px]",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 followedPlan === true
-                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                  ? "bg-success/10 border-success/20 text-success"
                   : "bg-muted border-border text-muted-foreground hover:bg-muted/80"
               )}
             >
@@ -102,7 +102,7 @@ export function CloseTradeWizard({ onCloseTrade, onCancel }: CloseTradeWizardPro
                 "p-5 rounded-lg border flex flex-col items-center gap-2 transition-colors h-[88px]",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 followedPlan === false
-                  ? "bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400"
+                  ? "bg-danger/10 border-danger/20 text-danger"
                   : "bg-muted border-border text-muted-foreground hover:bg-muted/80"
               )}
             >
@@ -140,14 +140,14 @@ export function CloseTradeWizard({ onCloseTrade, onCancel }: CloseTradeWizardPro
             <button
               type="button"
               onClick={() => handleFinish("Win")}
-              className={cn(buttonClass, "bg-emerald-500 text-white")}
+              className={cn(buttonClass, "bg-success text-white")}
             >
               Win
             </button>
             <button
               type="button"
               onClick={() => handleFinish("Loss")}
-              className={cn(buttonClass, "bg-rose-500 text-white")}
+              className={cn(buttonClass, "bg-danger text-white")}
             >
               Loss
             </button>

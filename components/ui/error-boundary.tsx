@@ -33,10 +33,10 @@ export class GlobalErrorBoundary extends Component<Props, State> {
           <div
             role="alert"
             aria-live="assertive"
-            className="flex flex-col items-center justify-center min-h-[400px] p-10 rounded-[2.5rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl text-center space-y-6"
+            className="glass-card flex flex-col items-center justify-center min-h-[400px] p-10 rounded-card text-center space-y-6"
           >
-            <div className="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center shadow-2xl shadow-rose-500/20 border border-rose-500/20">
-              <AlertTriangle className="text-rose-500" size={32} />
+            <div className="w-16 h-16 rounded-xl bg-danger/10 flex items-center justify-center shadow-sm border border-danger/20">
+              <AlertTriangle className="text-danger" size={32} />
             </div>
             <div className="space-y-2">
               <h2 className="text-lg font-semibold text-foreground">System Node Failure</h2>

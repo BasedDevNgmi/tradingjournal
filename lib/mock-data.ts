@@ -1,9 +1,10 @@
 import { Trade } from "@/types";
 import { AOC_CONFLUENCES, PSYCHO_TAGS, TRADING_PAIRS } from "@/lib/constants";
 import { calculateRR } from "@/lib/trade-utils";
+import { USD_NEWS_EVENTS } from "@/lib/usd-news-events";
 
 const SESSIONS = ["Asia", "London", "New York"] as const;
-export const NEWS_EVENTS = ["CPI", "FOMC Statement", "NFP", "PPI", "Retail Sales", "GDP", "Unemployment Rate", "ISM Manufacturing PMI"];
+export const NEWS_EVENTS = USD_NEWS_EVENTS;
 
 const NOTES_BY_EVENT: Record<string, Array<{ notes: string; lessons: string }>> = {
   CPI: [

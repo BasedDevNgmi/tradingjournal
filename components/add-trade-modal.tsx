@@ -119,7 +119,7 @@ export function AddTradeModal({
           <TradeForm
             key={initialData?.id ?? "new"}
             onSubmit={handleAddTrade}
-            initialData={initialData as Partial<Trade> | undefined}
+            initialData={initialData}
           />
         </ModalShell>
       </DialogContent>

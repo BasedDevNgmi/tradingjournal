@@ -22,26 +22,26 @@ export function getQualityLevelStyle(level: QualityLevel): QualityLevelStyle {
   switch (level) {
     case 3:
       return {
-        colorClass: "text-emerald-500",
+        colorClass: "text-success",
         label: `Level ${level} setup`,
         formLabel: "A+ Setup",
-        bgColor: "bg-emerald-500/10",
+        bgColor: "bg-success/10",
         riskLabel: "1% Risk",
       };
     case 2:
       return {
-        colorClass: "text-orange-500",
+        colorClass: "text-warning",
         label: `Level ${level} setup`,
         formLabel: "B Setup",
-        bgColor: "bg-orange-500/10",
+        bgColor: "bg-warning/10",
         riskLabel: "0.5% Risk",
       };
     default:
       return {
-        colorClass: "text-rose-500",
+        colorClass: "text-danger",
         label: `Level ${level} setup`,
         formLabel: "C Setup",
-        bgColor: "bg-rose-500/10",
+        bgColor: "bg-danger/10",
         riskLabel: "No Trade",
       };
   }

@@ -79,7 +79,7 @@ export function MetricTiles({ trade, isEditing = false, onUpdate }: MetricTilesP
             value={slStr}
             onChange={(e) => setSlStr(e.target.value)}
             onBlur={flushNumbers}
-            className="w-20 text-sm font-medium mono-data text-rose-500/80 bg-muted/30 border border-border/50 rounded px-2 py-1 outline-none focus:border-primary-accent"
+            className="w-20 text-sm font-medium mono-data text-danger/80 bg-muted/30 border border-border/50 rounded px-2 py-1 outline-none focus:border-primary-accent"
           />
           <Sep />
           <span className="text-muted-foreground text-xs shrink-0">TP</span>
@@ -89,7 +89,7 @@ export function MetricTiles({ trade, isEditing = false, onUpdate }: MetricTilesP
             value={tpStr}
             onChange={(e) => setTpStr(e.target.value)}
             onBlur={flushNumbers}
-            className="w-20 text-sm font-medium mono-data text-emerald-500/80 bg-muted/30 border border-border/50 rounded px-2 py-1 outline-none focus:border-primary-accent"
+            className="w-20 text-sm font-medium mono-data text-success/80 bg-muted/30 border border-border/50 rounded px-2 py-1 outline-none focus:border-primary-accent"
           />
         </div>
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
@@ -109,7 +109,7 @@ export function MetricTiles({ trade, isEditing = false, onUpdate }: MetricTilesP
           <span
             className={cn(
               "text-sm font-medium mono-data",
-              trade.rrPredicted >= 2 ? "text-emerald-500/80" : "text-orange-500/80"
+              trade.rrPredicted >= 2 ? "text-success/80" : "text-warning/80"
             )}
           >
             {formatNumber(trade.rrPredicted, 2)}R
@@ -121,39 +121,29 @@ export function MetricTiles({ trade, isEditing = false, onUpdate }: MetricTilesP
 
   return (
     <div className="space-y-1">
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Execution</p>
-      <dl className="space-y-2.5">
-        <div className="flex justify-between items-baseline gap-4">
-          <dt className="text-xs text-muted-foreground/80 shrink-0">Entry</dt>
-          <dd className="text-sm font-medium mono-data tabular-nums text-right">{formatNumber(trade.entryPrice, 4)}</dd>
-        </div>
-        <div className="flex justify-between items-baseline gap-4">
-          <dt className="text-xs text-muted-foreground/80 shrink-0">SL</dt>
-          <dd className="text-sm font-medium mono-data tabular-nums text-right text-rose-500/80">
-            {trade.stopLoss != null ? formatNumber(trade.stopLoss, 4) : "—"}
-          </dd>
-        </div>
-        <div className="flex justify-between items-baseline gap-4">
-          <dt className="text-xs text-muted-foreground/80 shrink-0">TP</dt>
-          <dd className="text-sm font-medium mono-data tabular-nums text-right text-emerald-500/80">
-            {trade.takeProfit != null ? formatNumber(trade.takeProfit, 4) : "—"}
-          </dd>
-        </div>
-        <div className="flex justify-between items-baseline gap-4">
-          <dt className="text-xs text-muted-foreground/80 shrink-0">Risk</dt>
-          <dd className="text-sm font-medium mono-data tabular-nums text-right">{trade.riskPercent ?? 1}%</dd>
-        </div>
-        <div className="flex justify-between items-baseline gap-4">
-          <dt className="text-xs text-muted-foreground/80 shrink-0">Target</dt>
-          <dd
-            className={cn(
-              "text-sm font-medium mono-data tabular-nums text-right",
-              trade.rrPredicted >= 2 ? "text-emerald-500/80" : "text-orange-500/80"
-            )}
-          >
-            {formatNumber(trade.rrPredicted, 2)}R
-          </dd>
-        </div>
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Execution</p>
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+        <dt className="text-xs text-muted-foreground/80 shrink-0">Entry</dt>
+        <dd className="text-sm font-medium mono-data tabular-nums text-right">{formatNumber(trade.entryPrice, 4)}</dd>
+        <dt className="text-xs text-muted-foreground/80 shrink-0">SL</dt>
+        <dd className="text-sm font-medium mono-data tabular-nums text-right text-danger/80">
+          {trade.stopLoss != null ? formatNumber(trade.stopLoss, 4) : "—"}
+        </dd>
+        <dt className="text-xs text-muted-foreground/80 shrink-0">TP</dt>
+        <dd className="text-sm font-medium mono-data tabular-nums text-right text-success/80">
+          {trade.takeProfit != null ? formatNumber(trade.takeProfit, 4) : "—"}
+        </dd>
+        <dt className="text-xs text-muted-foreground/80 shrink-0">Risk</dt>
+        <dd className="text-sm font-medium mono-data tabular-nums text-right">{trade.riskPercent ?? 1}%</dd>
+        <dt className="text-xs text-muted-foreground/80 shrink-0">Target</dt>
+        <dd
+          className={cn(
+            "text-sm font-medium mono-data tabular-nums text-right",
+            trade.rrPredicted >= 2 ? "text-success/80" : "text-warning/80"
+          )}
+        >
+          {formatNumber(trade.rrPredicted, 2)}R
+        </dd>
       </dl>
     </div>
   );

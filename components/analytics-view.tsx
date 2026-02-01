@@ -74,7 +74,7 @@ export function AnalyticsView() {
       </div>
 
       {hasNoClosedTrades && (
-        <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-200 text-sm font-medium">
+        <div className="p-5 rounded-card bg-warning/10 border border-warning/20 text-warning text-sm font-medium">
           Not enough data for this period. Close trades or change the time
           range to see analytics.
         </div>
@@ -92,8 +92,8 @@ export function AnalyticsView() {
                 className={cn(
                   "text-4xl font-bold tracking-tight tabular-nums",
                   hudMetrics.totalR >= 0
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-rose-600 dark:text-rose-400"
+                    ? "text-success"
+                    : "text-danger"
                 )}
               >
                 {hudMetrics.totalR >= 0 ? "+" : ""}
@@ -174,8 +174,8 @@ export function AnalyticsView() {
                           className={cn(
                             "text-lg font-semibold tabular-nums",
                             row.totalR >= 0
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-rose-600 dark:text-rose-400"
+                              ? "text-success"
+                              : "text-danger"
                           )}
                         >
                           {row.totalR >= 0 ? "+" : ""}
@@ -206,8 +206,8 @@ export function AnalyticsView() {
                           className={cn(
                             "text-lg font-semibold tabular-nums",
                             row.totalR >= 0
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-rose-600 dark:text-rose-400"
+                              ? "text-success"
+                              : "text-danger"
                           )}
                         >
                           {row.totalR >= 0 ? "+" : ""}
@@ -247,8 +247,8 @@ export function AnalyticsView() {
                           className={cn(
                             "text-lg font-semibold tabular-nums",
                             row.totalR >= 0
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-rose-600 dark:text-rose-400"
+                              ? "text-success"
+                              : "text-danger"
                           )}
                         >
                           {row.totalR >= 0 ? "+" : ""}
@@ -273,7 +273,7 @@ export function AnalyticsView() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       {newsEventTradeVsAvoid.trade.length > 0 && (
                         <div className="rounded-xl border border-border/20 bg-muted/5 p-4">
-                          <h4 className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mb-2 flex items-center gap-2">
+                          <h4 className="text-sm font-semibold text-success mb-2 flex items-center gap-2">
                             <TrendingUp size={14} />
                             Trade these
                           </h4>
@@ -295,7 +295,7 @@ export function AnalyticsView() {
                                     {row.name}
                                   </span>
                                   <div className="flex items-center gap-2 shrink-0 text-xs">
-                                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                                    <span className="font-semibold text-success tabular-nums">
                                       +{formatNumber(row.totalR)}R
                                     </span>
                                     <span className="text-muted-foreground">
@@ -314,7 +314,7 @@ export function AnalyticsView() {
                       )}
                       {newsEventTradeVsAvoid.avoid.length > 0 && (
                         <div className="rounded-xl border border-border/20 bg-muted/5 p-4">
-                          <h4 className="text-sm font-semibold text-rose-600 dark:text-rose-400 mb-2 flex items-center gap-2">
+                          <h4 className="text-sm font-semibold text-danger mb-2 flex items-center gap-2">
                             <TrendingDown size={14} />
                             Avoid these
                           </h4>
@@ -336,7 +336,7 @@ export function AnalyticsView() {
                                     {row.name}
                                   </span>
                                   <div className="flex items-center gap-2 shrink-0 text-xs">
-                                    <span className="font-semibold text-rose-600 dark:text-rose-400 tabular-nums">
+                                    <span className="font-semibold text-danger tabular-nums">
                                       {formatNumber(row.totalR)}R
                                     </span>
                                     <span className="text-muted-foreground">
@@ -401,8 +401,8 @@ export function AnalyticsView() {
                           className={cn(
                             "text-base font-semibold mt-1 tabular-nums",
                             planAdherenceStats.followed.totalR >= 0
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-rose-600 dark:text-rose-400"
+                              ? "text-success"
+                              : "text-danger"
                           )}
                         >
                           {planAdherenceStats.followed.totalR >= 0 ? "+" : ""}
@@ -421,8 +421,8 @@ export function AnalyticsView() {
                           className={cn(
                             "text-base font-semibold mt-1 tabular-nums",
                             planAdherenceStats.notFollowed.totalR >= 0
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-rose-600 dark:text-rose-400"
+                              ? "text-success"
+                              : "text-danger"
                           )}
                         >
                           {planAdherenceStats.notFollowed.totalR >= 0 ? "+" : ""}
@@ -450,7 +450,7 @@ export function AnalyticsView() {
                             className={cn(
                               "font-medium",
                               row.totalR < 0 &&
-                                "text-rose-600 dark:text-rose-400"
+                                "text-danger"
                             )}
                           >
                             {row.name}
@@ -460,8 +460,8 @@ export function AnalyticsView() {
                               className={cn(
                                 "font-medium tabular-nums",
                                 row.totalR >= 0
-                                  ? "text-emerald-600 dark:text-emerald-400"
-                                  : "text-rose-600 dark:text-rose-400"
+                                  ? "text-success"
+                                  : "text-danger"
                               )}
                             >
                               {row.totalR >= 0 ? "+" : ""}
@@ -490,7 +490,7 @@ export function AnalyticsView() {
                       <span className="text-label text-muted-foreground uppercase tracking-wider">
                         A+ setup WR
                       </span>
-                      <p className="text-xl font-semibold text-emerald-600 dark:text-emerald-400 mt-1 tabular-nums">
+                      <p className="text-xl font-semibold text-success mt-1 tabular-nums">
                         {formatNumber(playbookStats.highQualityWR, 0)}%
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
@@ -501,7 +501,7 @@ export function AnalyticsView() {
                       <span className="text-label text-muted-foreground uppercase tracking-wider">
                         Low quality WR
                       </span>
-                      <p className="text-xl font-semibold text-rose-600 dark:text-rose-400 mt-1 tabular-nums">
+                      <p className="text-xl font-semibold text-danger mt-1 tabular-nums">
                         {formatNumber(playbookStats.lowQualityWR, 0)}%
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
@@ -516,8 +516,8 @@ export function AnalyticsView() {
                         className={cn(
                           "text-xl font-semibold mt-1 tabular-nums",
                           playbookStats.leakR < 0
-                            ? "text-rose-600 dark:text-rose-400"
-                            : "text-emerald-600 dark:text-emerald-400"
+                            ? "text-danger"
+                            : "text-success"
                         )}
                       >
                         {playbookStats.leakR > 0 ? "+" : ""}

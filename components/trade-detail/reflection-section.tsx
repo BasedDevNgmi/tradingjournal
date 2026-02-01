@@ -4,7 +4,7 @@ import * as React from "react";
 import { Trade } from "@/types";
 import { cn } from "@/lib/utils";
 import { getQualityLevel, getQualityLevelStyle } from "@/lib/trade-utils";
-import { Shield, Brain } from "lucide-react";
+import { Shield, Brain, Check } from "lucide-react";
 import { AOC_CONFLUENCES, PSYCHO_TAGS } from "@/lib/constants";
 
 interface ReflectionSectionProps {
@@ -27,7 +27,7 @@ export function ReflectionSection({
   const qualityLevel = getQualityLevel(trade.confluences);
   const { colorClass: qualityColor, label: levelLabel, formLabel } = getQualityLevelStyle(qualityLevel);
   const levelBorder =
-    qualityLevel === 3 ? "bg-emerald-500/10 border-emerald-500/30" : qualityLevel === 2 ? "bg-orange-500/10 border-orange-500/30" : "bg-rose-500/10 border-rose-500/30";
+    qualityLevel === 3 ? "bg-success/10 border-success/30" : qualityLevel === 2 ? "bg-warning/10 border-warning/30" : "bg-danger/10 border-danger/30";
 
   const isClosed = trade.status !== "Open" && trade.status !== "Missed";
   const n = trade.confluences?.length ?? 0;
@@ -44,13 +44,13 @@ export function ReflectionSection({
 
   if (isEditing && onUpdate) {
     return (
-      <div className="space-y-10">
+      <div className="space-y-6">
         {contextLine && (
           <p className="text-sm text-muted-foreground pb-2 border-b border-border/30" aria-live="polite">
             {contextLine}
           </p>
         )}
-        <section className="space-y-3">
+        <section className="space-y-2">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 text-muted-foreground/40">
               <Shield size={12} />
@@ -65,7 +65,7 @@ export function ReflectionSection({
               </span>
             </div>
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {AOC_CONFLUENCES.map((conf) => {
               const selected = trade.confluences?.includes(conf);
               return (
@@ -87,12 +87,12 @@ export function ReflectionSection({
           </div>
         </section>
 
-        <section className="space-y-3">
+        <section className="space-y-2">
           <div className="flex items-center gap-2 text-muted-foreground/40">
             <Brain size={12} />
             <h3 className="text-xs font-semibold">Reflection</h3>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
               {PSYCHO_TAGS.map((tag) => {
                 const selected = trade.psychoTags?.includes(tag);
@@ -109,10 +109,10 @@ export function ReflectionSection({
                       "px-3 py-2 text-sm font-medium rounded-lg border transition-colors",
                       selected
                         ? isPositive
-                          ? "bg-emerald-500 border-emerald-500 text-white"
+                          ? "bg-success border-success text-white"
                           : isNegative
-                            ? "bg-rose-500 border-rose-500 text-white"
-                            : "bg-blue-500 border-blue-500 text-white"
+                            ? "bg-danger border-danger text-white"
+                            : "bg-primary-accent border-primary-accent text-white"
                         : "bg-muted/20 border-border text-muted-foreground hover:border-muted-foreground/40"
                     )}
                   >
@@ -148,13 +148,8 @@ export function ReflectionSection({
   }
 
   return (
-    <div className="space-y-10">
-      {contextLine && (
-        <p className="text-sm text-muted-foreground pb-2 border-b border-border/30" aria-live="polite">
-          {contextLine}
-        </p>
-      )}
-      <section className="space-y-3">
+    <div className="space-y-6">
+      <section className="space-y-2">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2 text-muted-foreground/40">
             <Shield size={12} />
@@ -164,7 +159,7 @@ export function ReflectionSection({
             <span
               className={cn(
                 "text-xs font-semibold px-2 py-0.5 rounded-md border",
-                qualityLevel === 3 ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30" : qualityLevel === 2 ? "text-orange-600 dark:text-orange-400 bg-orange-500/10 border-orange-500/30" : "text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/30"
+                qualityLevel === 3 ? "text-success bg-success/10 border-success/30" : qualityLevel === 2 ? "text-warning bg-warning/10 border-warning/30" : "text-danger bg-danger/10 border-danger/30"
               )}
             >
               {levelLabel}
@@ -174,24 +169,24 @@ export function ReflectionSection({
             </span>
           </div>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {trade.confluences?.map((conf, i) => (
-            <span
-              key={i}
-              className="px-2.5 py-1 rounded-lg bg-muted/30 border border-border/50 text-xs font-medium text-muted-foreground/70"
-            >
-              {conf}
-            </span>
-          ))}
-        </div>
+        {trade.confluences && trade.confluences.length > 0 ? (
+          <ul className="space-y-1 list-none">
+            {trade.confluences.map((conf, i) => (
+              <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Check size={12} className="shrink-0 text-primary-accent/80" aria-hidden />
+                <span>{conf}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </section>
 
-      <section className="space-y-3">
+      <section className="space-y-2">
         <div className="flex items-center gap-2 text-muted-foreground/40">
           <Brain size={12} />
           <h3 className="text-xs font-semibold">Reflection</h3>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {trade.psychoTags && trade.psychoTags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {trade.psychoTags.map((tag) => (

@@ -108,7 +108,7 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
           </div>
           <button
             onClick={() => onChange("")}
-            className="absolute -top-2 -right-2 bg-card text-muted-foreground border border-border p-1.5 rounded-full shadow-md hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/20 transition-all"
+            className="absolute -top-2 -right-2 bg-card text-muted-foreground border border-border p-1.5 rounded-full shadow-md hover:bg-danger/10 hover:text-danger hover:border-danger/20 transition-all"
           >
             <X size={14} />
           </button>

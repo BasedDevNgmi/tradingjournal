@@ -25,7 +25,7 @@ export function SettingsSidebar({ isOpen, onClose }: SettingsSidebarProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100]"
+            className="overlay-backdrop z-[100]"
             onClick={onClose}
             aria-hidden
           />

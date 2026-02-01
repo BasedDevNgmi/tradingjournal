@@ -32,8 +32,8 @@ export function ReturnCallout({ trade }: ReturnCalloutProps) {
     <div
       className={cn(
         "rounded-2xl border-2 p-4 md:p-5",
-        rrPositive && "bg-emerald-500/5 border-emerald-500/20",
-        rrNegative && "bg-rose-500/5 border-rose-500/20",
+        rrPositive && "bg-success/5 border-success/20",
+        rrNegative && "bg-danger/5 border-danger/20",
         !rrPositive && !rrNegative && "bg-muted/10 border-border/40"
       )}
     >
@@ -45,8 +45,8 @@ export function ReturnCallout({ trade }: ReturnCalloutProps) {
           <span
             className={cn(
               "text-2xl md:text-3xl font-bold tracking-tight mono-data tabular-nums",
-              rrPositive && "text-emerald-600 dark:text-emerald-400",
-              rrNegative && "text-rose-600 dark:text-rose-400",
+              rrPositive && "text-success",
+              rrNegative && "text-danger",
               !rrPositive && !rrNegative && "text-foreground"
             )}
           >
@@ -64,8 +64,8 @@ export function ReturnCallout({ trade }: ReturnCalloutProps) {
               className={cn(
                 "font-semibold mono-data tabular-nums",
                 (trade.pnlAmount ?? 0) >= 0
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-rose-600 dark:text-rose-400"
+                  ? "text-success"
+                  : "text-danger"
               )}
             >
               {pnlFormatted}
@@ -80,9 +80,9 @@ export function ReturnCallout({ trade }: ReturnCalloutProps) {
               title={trade.followedPlan ? "Followed plan" : "Did not follow plan"}
             >
               {trade.followedPlan ? (
-                <Check size={14} className="text-emerald-500 shrink-0" />
+                <Check size={14} className="text-success shrink-0" />
               ) : (
-                <X size={14} className="text-rose-500 shrink-0" />
+                <X size={14} className="text-danger shrink-0" />
               )}
               <span className="text-xs font-medium">Plan</span>
             </span>

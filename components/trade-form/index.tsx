@@ -16,7 +16,8 @@ import { Step4Reflection } from "./step4-reflection";
 export type { TradeFormValues };
 
 interface TradeFormProps {
-  initialData?: Trade;
+  /** Prefill form; partial trade is supported (e.g. duplicate and edit). */
+  initialData?: Partial<Trade> | Trade;
   onSubmit: (data: TradeFormValues, calculatedRR: number) => void;
   isSubmitting?: boolean;
 }
@@ -28,21 +29,21 @@ export function TradeForm({ initialData, onSubmit, isSubmitting }: TradeFormProp
     resolver: zodResolver(tradeFormSchema) as Resolver<TradeFormValues>,
     mode: "onChange",
     defaultValues: initialData ? {
-      pair: initialData.pair || "BTC/USDT",
-      direction: initialData.direction || "Long",
-      entryPrice: initialData.entryPrice,
-      stopLoss: initialData.stopLoss,
-      takeProfit: initialData.takeProfit,
-      confluences: initialData.confluences || [],
-      notes: initialData.notes || "",
-      lessonLearned: initialData.lessonLearned || "",
-      beforeScreenshotUrl: initialData.beforeScreenshotUrl || "",
-      afterScreenshotUrl: initialData.afterScreenshotUrl || "",
-      psychoTags: initialData.psychoTags || [],
+      pair: initialData.pair ?? "BTC/USDT",
+      direction: initialData.direction ?? "Long",
+      entryPrice: initialData.entryPrice ?? 100,
+      stopLoss: initialData.stopLoss ?? 98,
+      takeProfit: initialData.takeProfit ?? 105,
+      confluences: initialData.confluences ?? [],
+      notes: initialData.notes ?? "",
+      lessonLearned: initialData.lessonLearned ?? "",
+      beforeScreenshotUrl: initialData.beforeScreenshotUrl ?? "",
+      afterScreenshotUrl: initialData.afterScreenshotUrl ?? "",
+      psychoTags: initialData.psychoTags ?? [],
       pnlAmount: initialData.pnlAmount,
-      currency: initialData.currency || "USD",
+      currency: initialData.currency ?? "USD",
       isMissed: initialData.status === "Missed",
-      riskPercent: initialData.riskPercent || 1,
+      riskPercent: initialData.riskPercent ?? 1,
       session: initialData.session,
       isNewsDay: initialData.isNewsDay ?? false,
       newsEvent: initialData.newsEvent ?? "",

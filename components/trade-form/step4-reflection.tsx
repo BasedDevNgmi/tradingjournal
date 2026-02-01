@@ -39,9 +39,9 @@ export function Step4Reflection({ form, toggleArrayItem }: Step4ReflectionProps)
                     className={cn(
                       "px-3 py-2 text-sm font-medium rounded-lg border transition-colors",
                       isSelected 
-                        ? isPositive ? "bg-emerald-500 border-emerald-500 text-white shadow-md" :
-                          isNegative ? "bg-rose-500 border-rose-500 text-white shadow-md" :
-                          "bg-blue-500 border-blue-500 text-white shadow-md"
+                        ? isPositive ? "bg-success border-success text-white shadow-md" :
+                          isNegative ? "bg-danger border-danger text-white shadow-md" :
+                          "bg-primary-accent border-primary-accent text-white shadow-md"
                         : "bg-card text-muted-foreground border-border hover:border-muted-foreground/30"
                     )}
                   >

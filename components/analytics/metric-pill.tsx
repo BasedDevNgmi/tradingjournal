@@ -24,8 +24,8 @@ export function MetricPill({ label, value, positive, className }: MetricPillProp
       <span
         className={cn(
           "text-sm font-semibold tabular-nums truncate",
-          positive === true && "text-emerald-600 dark:text-emerald-400",
-          positive === false && "text-rose-600 dark:text-rose-400"
+          positive === true && "text-success",
+          positive === false && "text-danger"
         )}
       >
         {value}

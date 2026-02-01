@@ -63,7 +63,7 @@ function CollapsibleSection({
         />
       </button>
       {open && (
-        <div id={contentId} role="region" aria-labelledby={id} className="px-4 pb-4 pt-0">
+        <div id={contentId} role="region" aria-labelledby={id} className="px-4 pb-3 pt-0">
           {children}
         </div>
       )}
@@ -263,7 +263,7 @@ export function TradeDetailModal({ trade, open, onOpenChange }: TradeDetailModal
           />
 
           <div className="flex-1 overflow-y-auto scrollbar-thin min-h-0">
-            <div className="p-4 md:p-6 space-y-8">
+            <div className="p-4 md:p-6 space-y-6">
               {isEditing && (
                 <IdentitySection
                   trade={trade}
